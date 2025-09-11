@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Auth;
 
-use App\interfaces\iaccounttypeInterface;
+use App\Interfaces\iaccounttypeInterface;
 use App\Interfaces\icityInterface;
 use App\Interfaces\icustomerInterface;
 use App\Interfaces\iemploymentlocationInterface;
