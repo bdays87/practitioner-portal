@@ -2,12 +2,12 @@
 
 namespace App\implementations;
 
-use App\Interfaces\ImycdpInterface;
+use App\Interfaces\imycdpInterface;
 use App\Models\Mycdp;
 use App\Models\Mycdpattachment;
 use Illuminate\Support\Facades\Storage;
 
-class _mycdpRepository implements ImycdpInterface
+class _mycdpRepository implements imycdpInterface
 {
     /**
      * Create a new class instance.
