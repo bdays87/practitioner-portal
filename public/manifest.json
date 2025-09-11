@@ -1,0 +1,24 @@
+{
+    "name": "MEDICAL LABORATORY & CLINICAL SCIENTISTS COUNCIL OF ZIMBABWE",
+    "short_name": "MLCSCZ",
+    "start_url": "/",
+    "scope": "/",
+    "author": "Anixsys Pvt Ltd",
+    "version": "1.0",
+    "description": "Medical Laboratory & Clinical Scientists Council of Zimbabwe",
+    "orientation": "portrait",
+    "dir": "auto",
+    "lang": "en",
+    "display": "standalone",
+    "themeColor": " #000000",
+    "theme_color": " #000000",
+    "backgroundColor": "#ffffff",
+    "background_color": " #000000",
+    "icons": [
+        {
+            "src": "logo.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
