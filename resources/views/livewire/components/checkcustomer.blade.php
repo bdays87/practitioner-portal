@@ -1,7 +1,7 @@
 <div>
 <x-modal title="Update personal details" wire:model="modal" box-class="max-w-6xl" persistent separator>
     <x-form wire:submit="register">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid lg:grid-cols-3 gap-2">
         <x-input label="Name" wire:model="name" />
         <x-input label="Surname" wire:model="surname" />
         <x-input label="Previous Name" wire:model="previousname" />
