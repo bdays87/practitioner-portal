@@ -13,27 +13,35 @@
     <x-nav sticky full-width>
  
         <x-slot:brand>
-          
-           <img src="./logo/logo.jpg" alt="Logo" class="h-20">
-            {{-- Brand --}}
-            <div>Medical laboratory & Clinical Scientists Council of Zimbabwe</div>
+            <div class="flex items-center gap-2">
+                <img src="./logo/logo.jpg" alt="Logo" class="h-8 sm:h-12 md:h-16 lg:h-20 w-auto">
+                {{-- Brand --}}
+                <div class="hidden sm:block text-sm md:text-base lg:text-lg font-medium">
+                    <div class="hidden lg:block">Medical laboratory & Clinical Scientists Council of Zimbabwe</div>
+                    <div class="lg:hidden">MLCS Council</div>
+                </div>
+            </div>
         </x-slot:brand>
  
         {{-- Right side actions --}}
         <x-slot:actions>
-              
-        <x-dropdown >
-            <x-slot:trigger>
-                <x-button icon="o-bars-3" class="lg:hidden btn-ghost btn-sm" />
-        </x-slot:trigger>
-            <x-menu-item title="Login" link="{{ route('login') }}" icon="o-archive-box" />
-            <x-menu-item title="Register" link="{{ route('register') }}" icon="o-trash" />
-            <x-menu-item title="Forget Password" link="{{ route('forget') }}" icon="o-arrow-path" />
-        </x-dropdown>
-            <x-button label="Home"  link="{{ route('welcome') }}" class="btn-ghost " responsive />
-         
-            <x-button label="Login"  link="{{ route('login') }}" class="btn-ghost " responsive />
-            <x-button label="Register"  link="{{ route('register') }}" class="btn-ghost " responsive />
+            {{-- Mobile menu dropdown --}}
+            <x-dropdown class="lg:hidden">
+                <x-slot:trigger>
+                    <x-button icon="o-bars-3" class="btn-ghost btn-sm" />
+                </x-slot:trigger>
+                <x-menu-item title="Home" link="{{ route('welcome') }}" icon="o-home" />
+                <x-menu-item title="Login" link="{{ route('login') }}" icon="o-arrow-right-on-rectangle" />
+                <x-menu-item title="Register" link="{{ route('register') }}" icon="o-user-plus" />
+                <x-menu-item title="Forget Password" link="{{ route('forget') }}" icon="o-key" />
+            </x-dropdown>
+            
+            {{-- Desktop navigation buttons --}}
+            <div class="hidden lg:flex items-center gap-2">
+                <x-button label="Home" link="{{ route('welcome') }}" class="btn-ghost btn-sm" />
+                <x-button label="Login" link="{{ route('login') }}" class="btn-ghost btn-sm" />
+                <x-button label="Register" link="{{ route('register') }}" class="btn-ghost btn-sm" />
+            </div>
         </x-slot:actions>
     </x-nav>
 
