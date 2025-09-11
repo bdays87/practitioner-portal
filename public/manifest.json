@@ -10,10 +10,10 @@
     "dir": "auto",
     "lang": "en",
     "display": "standalone",
-    "themeColor": " #000000",
-    "theme_color": " #000000",
+    "themeColor": " #ffffff",
+    "theme_color": " #ffffff",
     "backgroundColor": "#ffffff",
-    "background_color": " #000000",
+    "background_color": " #ffffff",
     "icons": [
         {
             "src": "logo.png",
