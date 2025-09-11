@@ -2,7 +2,7 @@
 
 namespace App\implementations;
 
-use App\interfaces\iaccounttypeInterface;
+use App\Interfaces\iaccounttypeInterface;
 use App\Models\Accounttype;
 
 class _accounttypeRepository implements iaccounttypeInterface

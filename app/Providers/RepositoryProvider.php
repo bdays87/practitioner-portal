@@ -45,7 +45,7 @@ use App\implementations\_systemmoduleRepository;
 use App\implementations\_tireRepository;
 use App\implementations\_userRepository;
 use App\implementations\_applicationsessionRepository;
-use App\interfaces\iaccounttypeInterface;
+use App\Interfaces\iaccounttypeInterface;
 use App\Interfaces\iapplicationfeeInterface;
 use App\Interfaces\iapplicationsessionInterface;
 use App\Interfaces\iapplicationtypeInterface;
@@ -66,7 +66,7 @@ use App\Interfaces\iemploymentstatusInterface;
 use App\Interfaces\iexchangerateInterface;
 use App\Interfaces\igeneralutilsInterface;
 use App\Interfaces\imanualpaymentInterface;
-use App\Interfaces\imycdpInterface;
+use App\Interfaces\ImycdpInterface;
 use App\Interfaces\inationalityInterface;
 use App\Interfaces\invoiceInterface;
 use App\Interfaces\iotherserviceInterface;
@@ -147,7 +147,7 @@ class RepositoryProvider extends ServiceProvider
         $this->app->bind(icertificatetypeInterface::class, _certificatetypeRepository::class);
         $this->app->bind(istudentInterface::class, _studentRepository::class);
         $this->app->bind(iapplicationtypeInterface::class, _applicationtypeRepository::class);
-        $this->app->bind(imycdpInterface::class, _mycdpRepository::class);
+        $this->app->bind(ImycdpInterface::class, _mycdpRepository::class);
         $this->app->bind(iapplicationsessionInterface::class, _applicationsessionRepository::class);
     
     }
