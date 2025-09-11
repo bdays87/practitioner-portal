@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin\Components;
 
 use App\Interfaces\iapplicationsessionInterface;
-use App\Interfaces\ImycdpInterface;
+use App\Interfaces\imycdpInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -37,7 +37,7 @@ class Mycdps extends Component
         $this->year = date('Y');
         $this->cdps = new Collection();
     }
-    public function boot(ImycdpInterface $mcdprepo){
+    public function boot(imycdpInterface $mcdprepo){
         $this->mycdprepo = $mcdprepo;
     }
     public function getdata(){

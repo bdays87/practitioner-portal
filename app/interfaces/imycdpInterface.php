@@ -2,7 +2,7 @@
 
 namespace App\Interfaces;
 
-interface ImycdpInterface
+interface imycdpInterface
 {
     public function create($data);
     public function update($id,$data);

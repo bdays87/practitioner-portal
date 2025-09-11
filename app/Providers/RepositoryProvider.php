@@ -66,7 +66,7 @@ use App\Interfaces\iemploymentstatusInterface;
 use App\Interfaces\iexchangerateInterface;
 use App\Interfaces\igeneralutilsInterface;
 use App\Interfaces\imanualpaymentInterface;
-use App\Interfaces\ImycdpInterface;
+use App\Interfaces\imycdpInterface;
 use App\Interfaces\inationalityInterface;
 use App\Interfaces\invoiceInterface;
 use App\Interfaces\iotherserviceInterface;
@@ -147,7 +147,7 @@ class RepositoryProvider extends ServiceProvider
         $this->app->bind(icertificatetypeInterface::class, _certificatetypeRepository::class);
         $this->app->bind(istudentInterface::class, _studentRepository::class);
         $this->app->bind(iapplicationtypeInterface::class, _applicationtypeRepository::class);
-        $this->app->bind(ImycdpInterface::class, _mycdpRepository::class);
+        $this->app->bind(imycdpInterface::class, _mycdpRepository::class);
         $this->app->bind(iapplicationsessionInterface::class, _applicationsessionRepository::class);
     
     }
