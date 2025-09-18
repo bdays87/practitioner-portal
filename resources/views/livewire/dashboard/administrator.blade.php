@@ -11,11 +11,11 @@
         </div>
     </div>
    <!-- Main Content -->
-   <div class="container mx-auto px-4 py-8">
+   <div class="container mx-auto py-4">
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Total Registrations -->
-        <x-card class="bg-white border-l-4 border-blue-500">
+        <x-card class="bg-white border-2 border-blue-500">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-blue-100 mr-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,7 +39,7 @@
         </x-card>
 
         <!-- Pending Approvals -->
-        <x-card class="bg-white border-l-4 border-yellow-500">
+        <x-card class="bg-white border-2 border-yellow-500">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-yellow-100 mr-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,7 +63,7 @@
         </x-card>
 
         <!-- Revenue -->
-        <x-card class="bg-white border-l-4 border-green-500">
+        <x-card class="bg-white border-2 border-green-500">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-green-100 mr-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,7 +87,7 @@
         </x-card>
 
         <!-- Certificates Issued -->
-        <x-card class="bg-white border-l-4 border-purple-500">
+        <x-card class="bg-white border-2 border-purple-500">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-purple-100 mr-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -116,7 +116,7 @@
         <!-- Left Column -->
         <div class="lg:col-span-2 space-y-8">
             <!-- Recent Applications -->
-            <x-card title="Recent Applications" separator>
+            <x-card title="Recent Applications" separator class="border-2 border-gray-200">
                 <div class="overflow-x-auto">
                     <table class="table table-zebra w-full">
                         <thead>
@@ -183,7 +183,7 @@
             </x-card>
 
             <!-- Registration Analytics -->
-            <x-card title="Registration Analytics" separator>
+            <x-card title="Registration Analytics" separator class="border-2 border-gray-200">
                 <div class="h-80">
                     <!-- Chart would go here - using placeholder -->
                     <div class="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center">
@@ -199,7 +199,7 @@
         </div>
 
         <!-- Right Column -->
-        <div class="space-y-8">
+        <div class="space-y-8 ">
             <!-- Quick Actions -->
             <x-card title="Quick Actions" separator>
                 <div class="space-y-4">

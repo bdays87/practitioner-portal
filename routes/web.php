@@ -40,9 +40,19 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Checktransactions;
 use App\Livewire\Home;
+use App\Livewire\Mycontacts;
+use App\Livewire\Myemploymentdetails;
+use App\Livewire\Mymanualpayments;
+use App\Livewire\Myonlinepayments;
+use App\Livewire\Mystatements;
 use App\Livewire\Welcome;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+
+
+
+
+
 
 
 
@@ -95,6 +105,9 @@ Route::group([
     Volt::route('/dashboard', Home::class)->name('dashboard');
     Volt::route('/accounttypes', Accounttypes::class)->name('accounttypes.index');
     Volt::route('/roles', Roles::class)->name('roles.index');
+    Volt::route('/mystatements', Mystatements::class)->name('mystatements.index');
+    Volt::route('/myonlinepayments', Myonlinepayments::class)->name('myonlinepayments.index');
+    Volt::route('/mymanualpayments', Mymanualpayments::class)->name('mymanualpayments.index');
     Volt::route('/systemmodules', Systemmodules::class)->name('systemmodules.index');
     Volt::route('/roles/{role_id}/show', Roleshow::class)->name('roles.show');
     Volt::route('/users', Users::class)->name('users.index');

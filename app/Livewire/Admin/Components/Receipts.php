@@ -59,7 +59,7 @@ class Receipts extends Component
         ]);
       $response=  $this->invoicerepo->settleinvoice([
             "invoice_id"=>$this->invoice->id,
-            "amount"=>$this->totalpable,
+            "amount"=>$this->totalpable, 
             "currency_id"=>$this->currency_id,
             "customer_id"=>$this->invoice->customer_id,
             "exchangerate_id"=>$this->exchangerate->id,

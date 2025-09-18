@@ -6,6 +6,7 @@ use App\Interfaces\iroleInterface;
 use App\Interfaces\iuserInterface;
 use App\Models\User;
 use App\Notifications\AccountcreatedNotification;
+use App\Notifications\Newaccountcreated;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -68,7 +69,7 @@ class _userRepository implements iuserInterface
             $this->assignrole($user->id, $role->id);
            }
             
-            $user->notify(new AccountcreatedNotification($data['name'], $data['email'], $data['password']));
+            $user->notify(new Newaccountcreated($data['name'], $data['email']));
             return ["status" => "success", "message" => "User created successfully","data"=>$user];
         } catch (\Exception $e) {
             return ["status" => "error", "message" => $e->getMessage()];

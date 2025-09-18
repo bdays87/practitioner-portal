@@ -12,15 +12,11 @@
         <x-menu-separator />
         <x-menu-item title="Dashboard" icon="o-home" link="{{ route('dashboard') }}"  />
         <x-menu-separator />
-        <x-menu-item title="Statements" icon="o-document-currency-dollar"   />
+        <x-menu-item title="Statements" icon="o-document-currency-dollar" link="{{ route('mystatements.index') }}"  />
         <x-menu-separator />
-        <x-menu-item title="Online payments" icon="o-banknotes" />
+        <x-menu-item title="Online payments" icon="o-banknotes" link="{{ route('myonlinepayments.index') }}" />
         <x-menu-separator />
-        <x-menu-item title="Contacts" icon="o-phone"  />
-        <x-menu-separator />
-        <x-menu-item title="Employment details" icon="o-book-open"  />
-        <x-menu-separator />
-        <x-menu-item title="My cdp" icon="o-bookmark-square"  />
+        <x-menu-item title="Manual payments" icon="o-banknotes" link="{{ route('mymanualpayments.index') }}" />
         <x-menu-separator />
         <x-menu-item title="My profile" icon="o-user"  />
         <x-menu-separator />

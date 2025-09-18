@@ -2,6 +2,7 @@
 
 namespace App\implementations;
 
+use App\Interfaces\icustomerprofessionInterface;
 use App\Interfaces\iexchangerateInterface;
 use App\Interfaces\igeneralutilsInterface;
 use App\Interfaces\invoiceInterface;
@@ -17,6 +18,13 @@ use App\Models\Receipt;
 use App\Models\Registrationfee;
 use App\Models\Settlementsplit;
 use App\Models\Suspense;
+use App\Models\User;
+use App\Notifications\ApplicationAwaitingApprovalNotification;
+use App\Notifications\InvoiceRegistrationNotification;
+use App\Notifications\InvoiceSettled;
+use App\Notifications\ProofofpaymentApproval;
+use App\Notifications\QualificationassesmentAwaitingApprovalNotification;
+use App\Notifications\RegistrationAwaitingApprovalNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -56,6 +64,7 @@ class _invoiceRepository implements invoiceInterface
         $this->suspense = $suspense;
         $this->customerprofessionqualificationassessment = $customerprofessionqualificationassessment;
         $this->exchangeraterepo = $exchangeraterepo;
+    
     }
 
     public function createInvoice($data)
@@ -67,7 +76,7 @@ class _invoiceRepository implements invoiceInterface
          * 4. if settlement split exists, get relevant data
          * 5. if settlement split does not exist, create invoice
          */
-        try{
+        try{  
         
            
         $customerprofession = $this->customerprofession->where('id',$data['customerprofession_id'])->first();
@@ -173,11 +182,15 @@ class _invoiceRepository implements invoiceInterface
             
             
         }
-        return $totalpayable;
+        return $totalpayable; 
     }
     public function getcustomerprofessioninvoices($customerprofession_id)
     {
      $invoices = $this->invoice->with('currency','customer','settlementsplit')->where('source_id',$customerprofession_id)->where('source','customerprofession')->get();
+    //dd($invoices);
+     if($invoices->count() == 0){
+      return [];
+     }
      $arraydata =[];
      $qualificationassessment = $this->checkqualificationassessment($customerprofession_id);
      $total_invoice = $invoices->sum('amount');
@@ -339,7 +352,14 @@ class _invoiceRepository implements invoiceInterface
     }
     public function createinvoiceproof($data)
     {try{
+        $invoice = $this->invoice->with('customer')->where('id',$data['invoice_id'])->first();
         $this->proofofpayment->create($data);
+        $users = User::permission("invoices.receipt")->get();
+        if(count($users) > 0){
+            foreach($users as $user){
+                $user->notify(new ProofofpaymentApproval($invoice));
+            }
+        }
         return ['status'=>'success','message'=>'Invoice proof created successfully'];
     }catch(\Exception $e){
         return ['status'=>'error','message'=>$e->getMessage()];
@@ -406,11 +426,11 @@ class _invoiceRepository implements invoiceInterface
           
             if($checkinvoice){
                 $settled = true;
-                $invoice = $this->invoice->where('id',$data['invoice_id'])->first();
-                $invoice->status = "PAID";
+                $invoice = $this->invoice->with('customer.customeruser.user')->where('id',$data['invoice_id'])->first();
+                $invoice->status = "PAID"; 
                 $invoice->save();
                 if($invoice->source == "customerprofession"){
-                    $customerprofession = $this->customerprofession->where('id',$invoice->source_id)->first();
+                    $customerprofession = $this->customerprofession->with('profession')->where('id',$invoice->source_id)->first();
                     
                   
                    if($invoice->description == "Registration"){
@@ -418,18 +438,43 @@ class _invoiceRepository implements invoiceInterface
                     $customerregistration->status = "AWAITING";
                     $customerregistration->save();
                     $customerprofession->update(["status"=>"AWAITING_REG"]);
+                    $user = $invoice->customer->customeruser->user;
+                    if($user){
+                    $user->notify(new InvoiceRegistrationNotification($invoice,$customerprofession->profession));
+                    $user = User::permission("registrations.approve")->get();
+                    foreach($user as $u){
+                        $u->notify(new RegistrationAwaitingApprovalNotification($invoice,$customerprofession->profession));
+                    }
+                    }
                       
                    }else if($invoice->description == "New Application"){
                     $customerapplication = $this->customerapplication->where('customerprofession_id',$customerprofession->id)->where('status','PENDING')->first();
                     $customerapplication->status = "AWAITING";
                     $customerapplication->save();
                     $customerprofession->update(["status"=>"AWAITING_APP"]);
+                    $user = User::permission("applications.approve")->get();
+                    foreach($user as $u){
+                        $u->notify(new ApplicationAwaitingApprovalNotification($invoice,$customerprofession->profession));
+                    }
                    }else if($invoice->description == "Qualification Assessment"){
                     $customerprofession->status = "AWAITING_QA";
                     $customerprofession->save();
+                    $user = User::permission("assessments.process")->get();
+                    foreach($user as $u){
+                        $u->notify(new QualificationassesmentAwaitingApprovalNotification($invoice,$customerprofession->profession));
+                    }
                    }
                    
                 }
+
+
+                //// send notification 
+                $user = $invoice->customer->customeruser->user;
+                $user->notify(new InvoiceSettled($invoice));
+
+
+
+
             
             }
             

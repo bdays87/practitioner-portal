@@ -36,6 +36,9 @@ class Customerprofession extends Model
     public function qualifications(){
         return $this->hasMany(Customerprofessionqualification::class);
     }
+    public function qualificationassessments(){
+        return $this->hasMany(Customerprofessionqualificationassessment::class);
+    }
     public function comments(){
         return $this->hasMany(Customerprofessioncomment::class);
     }

@@ -72,7 +72,7 @@
         @if ($customerprofession->qualifications->count() > 0)
         <x-alert title="Qualifications added" description=" Qualification have been added successfully." icon="o-check" class="alert-success">
             <x-slot:actions>
-                <x-button label="Continue" wire:click="nextstep(3)"/>
+                <x-button label="Continue" wire:click="nextstep(3)" spinner="nextstep"/>
             </x-slot:actions>
         </x-alert>
 
@@ -117,7 +117,7 @@
         <x-slot:actions>
             <x-button label="Previous" icon="o-arrow-left" class="btn btn-primary btn-outline" wire:click="prevstep(1)"/>
             @if ($customerprofession->qualifications->count() > 0)
-            <x-button label="Proceed" icon="o-arrow-right" class="btn btn-primary btn-outline" wire:click="nextstep(3)"/>
+            <x-button label="Proceed" icon="o-arrow-right" class="btn btn-primary btn-outline" wire:click="nextstep(3)" spinner="nextstep"/>
             @endif
         </x-slot:actions>
     </x-card>
@@ -233,7 +233,9 @@
     <x-form wire:submit="uploadDocument">
         <div class="grid  gap-2">
             <x-input label="File" wire:model="file" type="file" />
+            @if(auth()->user()->accounttype_id == 1)
             <x-checkbox label="Document verified" wire:model="verified" />
+            @endif
         </div>
         <x-slot:actions>
             <x-button label="Cancel" @click="$wire.uploadmodal = false" />
@@ -259,9 +261,9 @@
     </x-form>
 </x-modal>
 
-<x-modal wire:model="paymentmodal" title="Receipting" separator box-class="max-w-3xl h-screen">
+<x-modal wire:model="paymentmodal" title="Receipting" separator box-class="h-screen">
 
-    <div class="grid grid-cols-2 gap-2">
+    <div class="grid  gap-2">
     <x-button label="Attach Payment" icon="o-paper-clip" class="btn w-full btn-secondary" wire:click="getattachpayments"/>
 
     @if($invoice)

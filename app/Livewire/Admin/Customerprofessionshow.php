@@ -10,6 +10,7 @@ use App\Interfaces\iqualificationcategoryInterface;
 use App\Interfaces\iqualificationlevelInterface;
 use App\Interfaces\isuspenseInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Mary\Traits\Toast;
@@ -69,21 +70,36 @@ class Customerprofessionshow extends Component
         $this->uuid = $uuid;
         $this->invoices = [];
         $this->proofofpayments = new Collection();
-        $this->breadcrumbs = [
-            [
-                'label' => 'Dashboard',
-                'icon' => 'o-home',
-                'link' => route('dashboard'),
-            ],
-            [
-                'label' => 'Customer',
-                'icon' => 'o-home',
-                'link' => route('customers.index'),
-            ],
-            [
-                'label' => 'Customer Professions'
-            ],
-        ];
+        if(Auth::user()->accounttype_id == 1){
+            $this->breadcrumbs = [
+                [
+                    'label' => 'Dashboard',
+                    'icon' => 'o-home',
+                    'link' => route('dashboard'),
+                ],
+                [
+                    'label' => 'Customer',
+                    'icon' => 'o-home',
+                    'link' => route('customers.index'),
+                ],
+                [
+                    'label' => 'Customer Professions'
+                ],
+            ];
+            
+        }else{
+            $this->breadcrumbs = [
+                [
+                    'label' => 'Dashboard',
+                    'icon' => 'o-home',
+                    'link' => route('dashboard'),
+                ],
+                [
+                    'label' => 'My Profession'
+                ],
+            ];
+        }
+        
     }
     public function getcustomerprofession(){
        $payload= $this->customerprofessionrepo->getbyuuid($this->uuid);
@@ -109,7 +125,16 @@ class Customerprofessionshow extends Component
     public function nextstep($step){
         $this->step = $step;
         if($this->step == 3){
-            $this->invoices = $this->invoicerepo->getcustomerprofessioninvoices($this->customerprofession_id);
+           $data =$this->invoicerepo->getcustomerprofessioninvoices($this->customerprofession_id);
+           if(count($data) == 0){
+           $response= $this->customerprofessionrepo->generatepractitionerinvoice($this->customerprofession_id);
+         
+           if($response["status"] == "success"){
+              $this->invoices = $this->invoicerepo->getcustomerprofessioninvoices($this->customerprofession_id);
+          }
+           }else{
+            $this->invoices = $data;
+           }
         }
     }
 

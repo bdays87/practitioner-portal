@@ -7,6 +7,7 @@ use App\Interfaces\ipaynowInterface;
 use App\Interfaces\isuspenseInterface;
 use App\Models\Customer;
 use App\Models\Paynowtransaction;
+use App\Notifications\WallettopupNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Paynow\Payments\Paynow;
@@ -104,7 +105,7 @@ class _paynowRepository implements ipaynowInterface
     }
 
     public function checktransaction($uuid){
-        $transaction = $this->paynowtransaction->where('uuid', $uuid)->first();
+        $transaction = $this->paynowtransaction->with('customer.customeruser.user','currency')->where('uuid', $uuid)->first();
         if($transaction == null){
             return [
                 'status'=>'error',
@@ -138,6 +139,10 @@ class _paynowRepository implements ipaynowInterface
                 'createdby'=>Auth::user()->id
             ]);
             if($response['status']=='success'){
+                $user = $transaction?->customer?->customeruser?->user;
+                if($user){
+                    $user->notify(new WallettopupNotification($user->name." ".$user->surname,$transaction->amount,$transaction->currency->name));
+                }
                 return [
                     'status'=>'success',
                     'message'=>'Transaction Completed Successfully'
@@ -157,7 +162,7 @@ class _paynowRepository implements ipaynowInterface
     }
     public function checktransactionbyid($id){
 
-        $transaction = $this->paynowtransaction->where('id', $id)->first();
+        $transaction = $this->paynowtransaction->with('customer.customeruser.user','currency')->where('id', $id)->first();
         if($transaction == null){
             return [
                 'status'=>'error',
@@ -190,6 +195,10 @@ class _paynowRepository implements ipaynowInterface
                 'createdby'=>Auth::user()->id
             ]);
             if($response['status']=='success'){
+                $user = $transaction?->customer?->customeruser?->user;
+                if($user){
+                    $user->notify(new WallettopupNotification($user->name." ".$user->surname,$transaction->amount,$transaction->currency->name));
+                }
                 return [
                     'status'=>'success',
                     'message'=>'Transaction Completed Successfully'

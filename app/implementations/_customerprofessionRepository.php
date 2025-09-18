@@ -15,7 +15,10 @@ use App\Models\Customerregistration;
 use App\Models\Documentrequirement;
 use App\Models\Invoice;
 use App\Models\Qualificationcategory;
+use App\Notifications\ApplicationApprovalNotification;
+use App\Notifications\AssessmentApprovalnotification;
 use App\Notifications\Defaultnotification;
+use App\Notifications\RegistrationApprovalNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
@@ -110,7 +113,7 @@ class _customerprofessionRepository implements icustomerprofessionInterface
         } catch (\Throwable $th) {
             return ["status"=>"error","message"=>$th->getMessage()];
         }
-    }
+    } 
 
    public function generateregistrationinvoice($id){
     $customerprofession = $this->customerprofession->with("registration")->find($id);
@@ -124,25 +127,26 @@ class _customerprofessionRepository implements icustomerprofessionInterface
     }
    }
     public function generatepractitionerinvoice($id){
-        $customerprofession = $this->customerprofession->with("registration")->find($id);
+        $customerprofession = $this->customerprofession->with("registration","applications","qualificationassessments")->find($id);
+      //  dd($customerprofession);
         if(!$customerprofession){
             return ["status"=>"error","message"=>"Customer profession not found"];
         }
-        $registrationinvoice = $this->invoicerepo->createInvoice(['description'=>'Registration','customerprofession_id'=>$customerprofession->id,'year'=>date("Y")]);
-        if($registrationinvoice['status'] == "error"){
-          $this->customerprofession->where("id",$customerprofession->id)->delete();
-          return ["status"=>"error","message"=>$registrationinvoice['message']];
-        }
+        if($customerprofession->registration==null){
+            
+          $this->invoicerepo->createInvoice(['description'=>'Registration','customerprofession_id'=>$customerprofession->id,'year'=>date("Y")]);
+     
+    }
           
+    if(count($customerprofession->applications)==0){
     
-        $applicationinvoice = $this->invoicerepo->createInvoice(['description'=>'New Application','customerprofession_id'=>$customerprofession->id,'year'=>date("Y")]);
+       $this->invoicerepo->createInvoice(['description'=>'New Application','customerprofession_id'=>$customerprofession->id,'year'=>date("Y")]);
     
-        if($applicationinvoice['status'] == "error"){
-          $this->customerprofession->where("id",$customerprofession->id)->delete();
-          $invoice = $this->invoice->where("customer_id",$customerprofession->customer_id)->where("description","Registration")->where("year",date("Y"))->first()->first();
-          $invoice->delete();
-          return ["status"=>"error","message"=>$applicationinvoice['message']];
-        }
+    }
+    if(count($customerprofession->qualificationassessments)>0){
+        $this->invoicerepo->createInvoice(['description'=>'Qualification Assessment','customerprofession_id'=>$customerprofession->id,'year'=>date("Y")]);  
+    }
+    return ["status"=>"success","message"=>"Invoice generated successfully"];
     }
 
     public function update($id,$data)
@@ -225,6 +229,9 @@ class _customerprofessionRepository implements icustomerprofessionInterface
                 $data["verifiedby"] = Auth::user()->id;
                 unset($data["verified"]);
                 $data["status"] = "VERIFIED";
+            }else{
+                unset($data["verified"]);
+                $data["status"] = "PENDING";
             }
             $document = $this->customerprofessiondocument->create($data);
             return ["status"=>"success","message"=>"Document uploaded successfully","data"=>$document];
@@ -265,14 +272,14 @@ class _customerprofessionRepository implements icustomerprofessionInterface
                 return ["status"=>"error","message"=>"Qualification category not found"];
             }
             if($qualificationcategory->requireapproval=="Y"){
-                $applicationinvoice = $this->invoicerepo->createInvoice(['description'=>'Qualification Assessment','customerprofession_id'=>$data['customerprofession_id'],'year'=>date("Y")]);
+               // $applicationinvoice = $this->invoicerepo->createInvoice(['description'=>'Qualification Assessment','customerprofession_id'=>$data['customerprofession_id'],'year'=>date("Y")]);
                 $this->customerprofessionqualificationassessment->firstOrCreate([
                     "customerprofession_id"=>$data['customerprofession_id'],
                     "status"=>"PENDING"
                 ]);
-                if($applicationinvoice['status'] == "error"){
+                /*if($applicationinvoice['status'] == "error"){
                     return ["status"=>"error","message"=>$applicationinvoice['message']];
-                }
+                }*/
             }
                 
 
@@ -336,12 +343,18 @@ class _customerprofessionRepository implements icustomerprofessionInterface
                 $customerprofessionqualificationassessment = $this->customerprofessionqualificationassessment->where("customerprofession_id",$customerprofession->id)->where("status","PENDING")->first();
                 if($customerprofessionqualificationassessment){
                     $customerprofessionqualificationassessment->update(["status"=>"APPROVED","comment"=>$data['comment'],"user_id"=>Auth::user()->id]);
+                    $user = $customerprofession->customer->customeruser->user;
+                    $customerprofession->update(["status"=>"PENDING"]);
+                    $user->notify(new AssessmentApprovalnotification($data['status']));
                 }
             }elseif($data['commenttype'] == "Registration"){
                 $customerregistration = $this->customerprofessionregistration->where("customerprofession_id",$customerprofession->id)->first();
                 if($customerregistration){
                     $certificatenumber = $this->generalutils->generatecertificatenumber($customerprofession->profession->prefix,$customerregistration->id);
                     $customerregistration->update(["status"=>"APPROVED","registrationdate"=>date("Y-m-d"),"user_id"=>Auth::user()->id,"certificatenumber"=>$certificatenumber]);
+                    $user = $customerprofession->customer->customeruser->user;
+                    $customerprofession->update(["status"=>"PENDING"]);
+                    $user->notify(new RegistrationApprovalNotification($customerprofession->customer,$customerprofession->profession,$data['status'],$data['comment']));
                 }
                 
 
@@ -350,10 +363,13 @@ class _customerprofessionRepository implements icustomerprofessionInterface
                 if($customerprofessionapplication){
                     $certificatenumber = $this->generalutils->generatecertificatenumber($customerprofession->profession->prefix,$customerprofessionapplication->id);
                     $customerprofessionapplication->update(["status"=>"APPROVED","approvedby"=>Auth::user()->id,"certificate_number"=>$certificatenumber,'registration_date'=>date("Y-m-d"),'certificate_expiry_date'=>date("Y")."-12-31"]);
+                    $customerprofession->update(["status"=>"APPROVED"]);
+                    $user = $customerprofession->customer->customeruser->user;
+                    $user->notify(new ApplicationApprovalNotification($customerprofession->customer,$customerprofession->profession,$data['status'],$data['comment']));
                 }
                 
             }
-                $customerprofession->update(["status"=>"APPROVED"]);
+               
              }else{
                 if($data['commenttype'] == "Qualification Assessment"){
                     $customerprofessionqualificationassessment = $this->customerprofessionqualificationassessment->where("customerprofession_id",$customerprofession->id)->where("status","PENDING")->first();
@@ -369,7 +385,7 @@ class _customerprofessionRepository implements icustomerprofessionInterface
              unset($data['status']);
              $data['user_id'] = Auth::user()->id;
              $customerprofession->comments()->create($data);
-             $customerprofession->customer->customeruser->user->notify(new Defaultnotification($name,$data['commenttype'],$data['comment']));
+          //   $customerprofession->customer->customeruser->user->notify(new Defaultnotification($name,$data['commenttype'],$data['comment']));
           
             return ["status"=>"success","message"=>"Comment added successfully"];
         } catch (\Throwable $th) {

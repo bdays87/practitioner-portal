@@ -14,25 +14,8 @@
             </label>
             
             {{-- Notifications - hidden on mobile to save space --}}
-            <div class="hidden sm:flex items-center gap-1">
-                <x-button icon="o-envelope" class="btn-ghost btn-sm indicator">
-                    <span class="indicator-item badge badge-xs badge-error">5</span>
-                </x-button>
-                <x-button icon="o-bell" class="btn-ghost btn-sm indicator">
-                    <span class="indicator-item badge badge-xs badge-error">5</span>
-                </x-button>
-            </div>
-            
-            {{-- Mobile notifications dropdown --}}
-            <x-dropdown class="sm:hidden">
-                <x-slot:trigger>
-                    <x-button icon="o-bell" class="btn-ghost btn-sm indicator">
-                        <span class="indicator-item badge badge-xs badge-error">5</span>
-                    </x-button>
-                </x-slot:trigger>
-                <x-menu-item title="Messages" icon="o-envelope" />
-                <x-menu-item title="Notifications" icon="o-bell" />
-            </x-dropdown>
+       <livewire:components.notifications/>
+         
             
             {{-- User info - responsive display --}}
             <div class="hidden gap-2 items-center lg:flex">

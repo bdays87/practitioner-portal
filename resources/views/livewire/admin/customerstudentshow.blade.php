@@ -158,7 +158,7 @@
                     <td>{{ $data['customerprofession']->registration?->year }}</td>
                     <td>{{ $data['customerprofession']->registration?->certificatenumber??'N/A' }}</td>
                     <td>{{ $data['customerprofession']->registration?->registrationdate ??'N/A' }}</td>
-                    <td><x-badge value="{{ $data['customerprofession']->registration?->status }}" class="{{ $data['customerprofession']->registration?->status=='PENDING' ? 'badge-warning' : 'badge-success' }}" /></td>
+                    <td><x-badge value="{{ $data['customerprofession']->registration?->status }}" class="{{ $data['customerprofession']->registration?->status!='APPROVED' ? 'badge-warning' : 'badge-success' }}" /></td>
                     <td>
                         @if ($data['invoice'])
                         <x-badge value="{{ $data['invoice']->amount }} {{ $data['invoice']->currency->name }}" class="{{ $data['invoice']->status=='PENDING' ? 'badge-warning' : 'badge-success' }}" />
@@ -171,8 +171,9 @@
                             @if($data['customerprofession']->registration->status=='PENDING')
                              <livewire:admin.components.receipts :invoice="$data['invoice']" />
                              @else
+                             @if($data['customerprofession']->registration->status=='APPROVED')
                              <x-button icon="o-arrow-down-tray" label="Download" class="btn-sm btn-success" spinner wire:click="downloadregistrationcertificate({{ $data['customerprofession']->registration->id }})" />
-              
+                             @endif
                             @endif
                          </div>
                     </td>

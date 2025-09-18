@@ -1,30 +1,20 @@
 <div>
     <x-card title="Professions" class="mt-5 border-2 border-gray-200" separator>
         <x-slot:menu>
-            <x-button icon="o-plus" label="Add Profession" class="btn btn-primary" wire:click="$set('addmodal', true)" spinner />
+            <x-button icon="o-plus" label="Add Profession" class="btn btn-primary" responsive wire:click="$set('addmodal', true)" spinner />
         </x-slot:menu>
 
-        <table class="table t table-zebra">
-            <thead>
-                <tr>
-                    <th>Profession</th>
-                    <th>Reg Type</th>
-                    <th>Customertype</th>
-                    <th>Approval Status</th>
-                    <th>Compliance Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
+                 @if($customer->customerprofessions->count()>0)
+               <div class="grid lg:grid-cols-6 gap-0">
                 @forelse ($customer->customerprofessions as $customerprofession)
-                <tr>
-                    <td>{{ $customerprofession->profession->name }}</td>
-                    <td>{{ $customerprofession->registertype->name }}</td>
-                    <td>{{ $customerprofession->customertype->name }}</td>
-                    <td>
+              
+                    <div class="border border-gray-200 p-2">{{ $customerprofession->profession->name }}</div>
+                    <div class="border border-gray-200 p-2">{{ $customerprofession->registertype->name }}</div>
+                    <div class="border border-gray-200 p-2">{{ $customerprofession->customertype->name }}</div>
+                    <div class="border border-gray-200 p-2">
                         <x-badge value="{{ $customerprofession->status }}" class="{{ $customerprofession->status=='PENDING' ? 'badge-warning badge-outline badge-sm' : 'badge-success badge-dashed badge-sm' }}" />
-                    </td>
-                    <td>
+                    </div>
+                    <div class="border border-gray-200 p-2">
                         @if($customerprofession->applications->count()>0 && $customerprofession->applications->last()->status == 'APPROVED')
                             @if($customerprofession->isCompliant())
                                 <x-badge value="Compliant" class="badge-success badge-sm" />
@@ -34,8 +24,8 @@
                         @else
                             <x-badge value="N/A" class="badge-neutral badge-sm" />
                         @endif
-                    </td>
-                    <td>
+                    </div>
+                    <div class="border border-gray-200 p-2">
                         <div class="flex items-center justify-end space-x-2">
                             @if (strtolower($customerprofession->status) == 'pending')
                             @if($customerprofession->customertype->name=='Student')
@@ -56,24 +46,28 @@
                                  <x-button icon="o-arrow-path"  class="btn-sm btn-warning"/>
                                  
                                  @endif
-                                    <x-button icon="o-arrow-down-tray"  class="btn-sm btn-info" 
+                                    <x-button icon="o-arrow-down-tray" label="Download" responsive class="btn-sm btn-info" 
                                 wire:click="viewapplication({{ $customerprofession->id }})" spinner />
                                   <livewire:admin.components.mycdps :customerprofession_id="$customerprofession->id" :sessions="$applicationsessions"/>
                                 @endif
                            @endif
                         </div>
-                    </td>
-                </tr>
+                    </div>
+               
                 @empty
-                <tr>
-                    <td colspan="8">
-                        <div class="text-center text-red-500 p-5 font-bold bg-red-50">
-                       No profession found.</div>
-                        </td>
-                </tr>
+                <div>
+                    <div class="text-center text-red-500 p-5 font-bold bg-red-50">
+                   No profession found.</div>
+                </div>
                 @endforelse
-            </tbody>
-        </table>
+               </div>
+                @else
+                <div>
+                    <div class="text-center text-red-500 p-5 font-bold bg-red-50">
+                        No profession found.</div>
+                </div>
+                @endif
+           
         
     </x-card>
     <x-modal wire:model="addmodal" title="Add Profession" box-class="max-w-4xl" separator>

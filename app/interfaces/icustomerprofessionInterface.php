@@ -10,7 +10,8 @@ public function getcustomerstudent($uuid);
 public function create($data);
 public function update($id,$data);
 public function delete($id);
-public function generateregistrationinvoice($id);
+public function generateregistrationinvoice($id); 
+public function generatepractitionerinvoice($id); 
 
 public function uploadDocument(array $data);
 public function removedocument($document_id,$customerprofession_id);

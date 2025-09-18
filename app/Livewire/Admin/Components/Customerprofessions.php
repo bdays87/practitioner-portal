@@ -133,7 +133,7 @@ class Customerprofessions extends Component
             // Generate QR code as SVG string
             $qrcodeSvg = QrCode::size(300) 
                 ->format('svg')
-                ->generate(config('generalutils.base_url').'/verifications/registration/'.$registration->certificatenumber);
+                ->generate("Practitioner Name:".$registration->customerprofession->customer->name." ".$registration->customerprofession->customer->surname."\n".config('generalutils.base_url').'/verifications/registration/'.$registration->certificatenumber);
             
             // Generate PDF with the QR code as a data URI
             $pdf = Pdf::loadView('certificates.registrations', [
@@ -153,7 +153,7 @@ class Customerprofessions extends Component
             $practising = $this->customerprofessionrepo->generatepractisingcertificate($id);
             $qrcodeSvg = QrCode::size(300) 
             ->format('svg')
-            ->generate(config('generalutils.base_url').'/verifications/practising/'.$practising->certificate_number);
+            ->generate("Practitioner Name:".$practising->customerprofession->customer->name." ".$practising->customerprofession->customer->surname."\n expire date:".$practising->certificate_expiry_date."\n verification link:".config('generalutils.base_url').'/verifications/practising/'.$practising->certificate_number);
         
         // Generate PDF with the QR code as a data URI
         $pdf = Pdf::loadView('certificates.practising', [
