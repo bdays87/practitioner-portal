@@ -1,7 +1,7 @@
 <div>
     <x-card title="Professions" class="mt-5 border-2 border-gray-200" separator>
         <x-slot:menu>
-            <x-button icon="o-plus" label="Add Profession" class="btn btn-primary" responsive wire:click="$set('addmodal', true)" spinner />
+            <x-button icon="o-plus"  class="btn-circle btn-primary" responsive wire:click="$set('addmodal', true)" spinner />
         </x-slot:menu>
 
                  @if($customer->customerprofessions->count()>0)
@@ -32,24 +32,23 @@
                             <x-button icon="o-eye" label="View" class="btn-sm btn-info btn-outline" 
                             link="{{ route('customer.student.show', $customerprofession->uuid) }}" spinner />
                             @else
-                            <x-button icon="o-eye" label="View" class="btn-sm btn-info btn-outline" 
+                            <x-button icon="o-eye" label="Continue" class="btn-sm btn-info btn-outline" 
                            link="{{ route('customer.profession.show', $customerprofession->uuid) }}" spinner />
                            @endif
                            <x-button icon="o-trash" label="Delete" class="btn-sm btn-error btn-outline" 
                            wire:click="delete({{ $customerprofession->id }})" wire:confirm="Are you sure?" spinner />
                            @elseif (strtolower($customerprofession->status) == 'approved')
                                 @if($customerprofession->customertype->name=='Student')
-                                <x-button icon="o-eye" label="View" class="btn-sm btn-info btn-outline" 
+                                <x-button icon="o-eye" label="Continue" class="btn-sm btn-info btn-outline" 
                                 link="{{ route('customer.student.show', $customerprofession->uuid) }}" spinner />
                                 @else
                                  @if($customerprofession->applications->count()>0 && $customerprofession->applications->last()->isExpired())
-                                 <x-button icon="o-arrow-path"  class="btn-sm btn-warning"/>
+                                 <x-button icon="o-arrow-path" label="Renew"  class="btn-sm btn-warning"/>
                                  
                                  @endif
-                                    <x-button icon="o-arrow-down-tray" label="Download" responsive class="btn-sm btn-info" 
+                                    <x-button icon="o-arrow-down-tray" label="View" responsive class="btn-sm btn-success" 
                                 wire:click="viewapplication({{ $customerprofession->id }})" spinner />
-                                  <livewire:admin.components.mycdps :customerprofession_id="$customerprofession->id" :sessions="$applicationsessions"/>
-                                @endif
+                                             @endif
                            @endif
                         </div>
                     </div>
@@ -90,8 +89,7 @@
     </x-modal>
 
     <x-modal wire:model="openmodal" title="Customer Profession Certificates" separator box-class="max-w-4xl">
-
-        <x-card title="Registration Certificates" separator class="border-2 border-gray-200">
+               <x-card title="Registration Certificates" separator class="border-2 border-gray-200">
             <table class="table table-zebra">
                 <thead>
                     <tr>
@@ -99,13 +97,14 @@
                         <th>Registration date</th>
                         <th></th>
                     </tr>
-                </thead>
+                </thead> 
                 <tbody>
                     <tr>
                         <td>{{ $customerprofession?->registration?->certificatenumber }}</td>
                         <td>{{ $customerprofession?->registration?->registrationdate }}</td>                        
                         <td class="flex justify-end">
                             <x-button icon="o-arrow-down-tray" label="Download" class="btn-sm btn-info btn-outline" spinner wire:click="downloadregistrationcertificate({{ $customerprofession?->registration?->id }})" />
+                                
                         </td>
                     </tr>
                   
@@ -144,6 +143,8 @@
                             @else
                             <x-button icon="o-arrow-down-tray" label="Download" class="btn-sm btn-info btn-outline" spinner wire:click="downloadpractisingcertificate({{ $application->id }})" />
                             @endif
+                           
+
                         </td>
                     </tr>
                     @empty

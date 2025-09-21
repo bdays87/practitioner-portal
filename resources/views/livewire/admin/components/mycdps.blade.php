@@ -1,10 +1,15 @@
 <div>
-    <x-button label="CDP" class="btn-sm btn-primary" 
-    wire:click="getcdps" spinner />
-    <x-modal wire:model="modal" title="CDP List" box-class="max-w-full max-h-full w-screen h-screen">
-        <x-hr/>
-        <x-button icon="o-plus" label="Add CDP" class="btn-sm btn-primary" wire:click="$set('addmodal', true)" />
- 
+  
+    <x-card  title="My CDPs" separator class="border-2 border-gray-200">
+        <x-slot:menu>
+            <x-input wire:model.live="year" placeholder="Select Year" />
+            <x-select wire:model.live="customerprofession_id" placeholder="Select Profession" :options="$customerprofessions" option-label="name" option-value="id" />
+           @if($customerprofession_id)
+            <x-button icon="o-plus" label="Add CDP" class="btn-sm btn-primary" wire:click="$set('addmodal', true)" />
+            @endif
+        </x-slot:menu>
+   
+ <x-hr/>
         <table class="table table-compact">
             <thead>
                 <tr>

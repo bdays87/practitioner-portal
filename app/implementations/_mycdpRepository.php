@@ -53,10 +53,12 @@ class _mycdpRepository implements imycdpInterface
         }   
     }
     public function get($id){
-      
-             $check = $this->mycdp->with('attachments')->where('id',$id)->first();
+             $check = $this->mycdp->with([
+                'attachments',
+                'customerprofession.customer',
+                'customerprofession.profession'
+             ])->where('id',$id)->first();
              return $check;
-       
     }
     public function savesassessment($data){
         try{
@@ -100,12 +102,29 @@ class _mycdpRepository implements imycdpInterface
         try{
              $check = $this->mycdp->find($id);
              if($check){
-                $check->update(['status'=>'AWAITING_ASSESSMENT']);
+                $check->update(['status'=>'AWAITING']);
                 return ["status"=>"success","message"=>"Mycdp submitted for assessment successfully"];
              }
              return ["status"=>"error","message"=>"Mycdp not found"];
         }catch(\Exception $e){
             return ["status"=>"error","message"=>$e->getMessage()];
         }   
+    }
+
+    public function getcdps($year,$status){
+        return $this->mycdp->with('customerprofession.profession','customerprofession.customer','customerprofession.customertype','customerprofession.registertype')->where('year',$year)->where('status',$status)->get();
+    }
+    public function assignpoints($id,$points){
+        try{
+            $check = $this->mycdp->find($id);
+            if($check){
+                $check->update(['points'=>$points['points'],'comment'=>$points['comment'],"status"=>"PROCESSED"]);
+                return ["status"=>"success","message"=>"Mycdp points assigned successfully"];
+            
+            }
+            return ["status"=>"error","message"=>"Mycdp not found"];
+        }catch(\Exception $e){
+            return ["status"=>"error","message"=>$e->getMessage()];
+        }
     }
 }

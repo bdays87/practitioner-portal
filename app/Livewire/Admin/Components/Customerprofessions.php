@@ -104,8 +104,14 @@ class Customerprofessions extends Component
             'employmentlocation_id'=>$this->employmentlocation_id,
         ]);
         if($response['status']=='success'){
-            $this->addmodal = false;
+            $this->addmodal = false; 
             $this->success('Profession added successfully.');
+            $customertypes = $this->getcustomertype();
+            if($customertypes->where('id',$this->customertype_id)->first()->name=='Student'){
+                $this->redirect(route('admin.customer.show',$response['data']));
+            }else{
+                $this->redirect(route('customer.profession.show',$response['data']));
+            }
             $this->dispatch('refresh');
    
         }else{

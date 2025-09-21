@@ -67,7 +67,7 @@ class Receipts extends Component
         if($response['status'] == "success"){
             $this->paymentmodal = false;
              $this->success($response['message']);
-            $this->dispatch('invoicecreated',invoice_id:$this->invoice->id);
+            $this->dispatch('invoicesettled',invoice_id:$this->invoice->id);
         }else{
             $this->error($response['message']);
         }

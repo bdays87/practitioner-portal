@@ -19,7 +19,7 @@ class Customerprofessionshow extends Component
 {
     use Toast,WithFileUploads;
     public $uuid;
-    public  $breadcrumbs=[];
+    public  $breadcrumbs=[]; 
     protected $customerprofessionrepo;
     protected $qualificationcategoryrepo;
     protected $qualificationlevelrepo;
@@ -32,7 +32,7 @@ class Customerprofessionshow extends Component
     public $qualification_id;
     public $qualificationmodal = false;
     public $name;
-    public $qualificationcategory_id;
+    public $qualificationcategory_id; 
     public $qualificationlevel_id;
     public $institution;
     public $year;
@@ -129,9 +129,9 @@ class Customerprofessionshow extends Component
            if(count($data) == 0){
            $response= $this->customerprofessionrepo->generatepractitionerinvoice($this->customerprofession_id);
          
-           if($response["status"] == "success"){
+        
               $this->invoices = $this->invoicerepo->getcustomerprofessioninvoices($this->customerprofession_id);
-          }
+       
            }else{
             $this->invoices = $data;
            }
@@ -319,7 +319,7 @@ class Customerprofessionshow extends Component
     }
     
         
-    public function render()
+    public function render() 
     {
         return view('livewire.admin.customerprofessionshow',[
             "customerprofession"=>$this->getcustomerprofession()["customerprofession"],

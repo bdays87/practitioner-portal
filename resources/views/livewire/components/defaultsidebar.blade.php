@@ -18,7 +18,7 @@
         <x-menu-separator />
         <x-menu-item title="Manual payments" icon="o-banknotes" link="{{ route('mymanualpayments.index') }}" />
         <x-menu-separator />
-        <x-menu-item title="My profile" icon="o-user"  />
+        <x-menu-item title="My activities" icon="o-user" link="{{ route('customer.activities') }}"  />
         <x-menu-separator />
     
 

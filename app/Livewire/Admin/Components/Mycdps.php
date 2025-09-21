@@ -13,11 +13,9 @@ use Mary\Traits\Toast;
 class Mycdps extends Component
 {
     use Toast,WithFileUploads;
-    public $customerprofession_id;
-    public $sessions;
+ 
     public $year;
     protected $mycdprepo;
-    public $cdps;
     public $mycdp= null;
     public $modal = false;
     public $addmodal = false;
@@ -30,22 +28,42 @@ class Mycdps extends Component
     public $id;
     public $file;
     public $attachmentmodal = false;
+  
+    public $customerprofession;
+    public $customerprofession_id;
 
-    public function mount($customerprofession_id,$sessions){
-        $this->customerprofession_id = $customerprofession_id;
-        $this->sessions = $sessions;
+    public function mount(){
+   
         $this->year = date('Y');
-        $this->cdps = new Collection();
     }
     public function boot(imycdpInterface $mcdprepo){
         $this->mycdprepo = $mcdprepo;
     }
     public function getdata(){
-        $this->cdps = $this->mycdprepo->getbycustomerprofession($this->customerprofession_id,$this->year);
+        if($this->customerprofession_id){
+       $data = $this->mycdprepo->getbycustomerprofession($this->customerprofession_id,$this->year);
+    
+      return  $data;
+        }else{
+           return  new Collection();
+        }
+    }
+    public function UpdatedCustomerprofession_id(){
+        dd($this->customerprofession_id);
+    
+    $this->getdata();
+    }
+    public function getcustomerprofessions(){
+       $professions =auth()->user()->customer->customer->customerprofessions;
+       $array = [];
+       foreach($professions as $profession){
+        $array[] = ["id"=>$profession->id,"name"=>$profession->profession->name];
+       }
+       return $array;
     }
     public function getcdps(){
         $this->getdata();
-        $this->modal = true;
+  
     }
     public function save(){
         $this->validate([
@@ -133,7 +151,7 @@ class Mycdps extends Component
             'type'=>'required',
             'file'=>'required',
         ]);
-        $file = $this->file->store('mycdp');
+        $file = $this->file->store('mycdp','public');
         $respomse = $this->mycdprepo->saveattachment([
             'type'=>$this->type,
             'file'=>$file,
@@ -166,6 +184,9 @@ class Mycdps extends Component
     }
     public function render()
     {
-        return view('livewire.admin.components.mycdps');
+        return view('livewire.admin.components.mycdps',[
+            'customerprofessions'=>$this->getcustomerprofessions(),
+            'cdps'=>$this->getdata(),
+        ]);
     }
 }

@@ -6,12 +6,11 @@
                     <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
                     <p class="mt-1 text-sm text-gray-500">Welcome back, {{ auth()->user()->name }} {{ auth()->user()->surname }} ({{ auth()->user()->accounttype->name }})</p>
                 </div>
-                <div class="flex gap-2">
+          
                     @if(auth()->user()->customer)
-                    <livewire:admin.components.wallettopups :customer="auth()->user()->customer->customer" :currencies="$currencies"/>
-                    <livewire:admin.components.walletbalances :customer="auth()->user()->customer->customer"/>
+                             <livewire:admin.components.walletbalances :customer="auth()->user()->customer->customer"/>
                     @endif
-                </div>
+                
                 
             </div>
         </div>

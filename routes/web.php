@@ -8,6 +8,7 @@ use App\Livewire\Admin\Assessments;
 use App\Livewire\Admin\Banks;
 use App\Livewire\Admin\Banktransactions;
 use App\Livewire\Admin\Configurations;
+use App\Livewire\Admin\Cpdapprovals;
 use App\Livewire\Admin\Currencies;
 use App\Livewire\Admin\Customerprofessionshow;
 use App\Livewire\Admin\Customers;
@@ -45,52 +46,14 @@ use App\Livewire\Myemploymentdetails;
 use App\Livewire\Mymanualpayments;
 use App\Livewire\Myonlinepayments;
 use App\Livewire\Mystatements;
+use App\Livewire\Newapplications\Practitioners\Assesmentinvoicing;
+use App\Livewire\Newapplications\Practitioners\Documentupload;
+use App\Livewire\Newapplications\Practitioners\Qualificationscapture;
+use App\Livewire\Newapplications\Practitioners\Registrationinvoicing;
+use App\Livewire\Newapplications\Practitioners\Applicationinvoicing;
 use App\Livewire\Welcome;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -131,13 +94,22 @@ Route::group([
     Volt::route('/customers', Customers::class)->name('customers.index');
     Volt::route('/applicationsessions', Applicationsessions::class)->name('applicationsessions.index');
     Volt::route('/assessments', Assessments::class)->name('assessments.index');
+    Volt::route('/cdpapprovals', Cpdapprovals::class)->name('cdpapprovals.index');
+    Route::get('/activities', \App\Livewire\Admin\Activities::class)->name('admin.activities');
+    Route::get('/activities/{activity_id}/quiz', \App\Livewire\Admin\ActivityQuizManagement::class)->name('admin.activity.quiz');
+    Route::get('/my-activities', \App\Livewire\Customer\Activities::class)->name('customer.activities');
+    Route::get('/quiz/{enrollment_id}', \App\Livewire\Customer\QuizTaking::class)->name('customer.quiz');
     Volt::route('/registrationapprovals', Registrationapprovals::class)->name('registrationapprovals.index');
     Volt::route('/registrationapprovals/{uuid}', Viewregistration::class)->name('registrationapprovals.show');
     Volt::route('/applicationapprovals', Applicationapprovals::class)->name('applicationapprovals.index');
     Volt::route('/applicationapprovals/{uuid}', Viewapplication::class)->name('applicationapprovals.show');
     Volt::route('/assessments/{uuid}', Viewassessement::class)->name('assessment.show');
-    Volt::route('/customers/{uuid}/profession', Customerprofessionshow::class)->name('customer.profession.show');
+    Volt::route('/customers/{uuid}/profession', Documentupload::class)->name('customer.profession.show');
     Volt::route('/customers/{uuid}/student', Customerstudentshow::class)->name('customer.student.show');
     Volt::route('/customers/{uuid}/topup', Customers::class)->name('customers.topup');
     Volt::route('/customers/{uuid}/show', Customershow::class)->name('customers.show');
+    Volt::route('/customers/{uuid}/qualifications', Qualificationscapture::class)->name('newapplications.practitioners.qualificationscapture');
+    Volt::route('/customers/{uuid}/assessments', Assesmentinvoicing::class)->name('newapplications.practitioners.assessmentinvoicing');
+    Volt::route('/customers/{uuid}/registration', Registrationinvoicing::class)->name('newapplications.practitioners.registrationinvoicing');
+    Volt::route('/customers/{uuid}/application', Applicationinvoicing::class)->name('newapplications.practitioners.applicationinvoicing');
 });

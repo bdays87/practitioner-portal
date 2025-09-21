@@ -184,6 +184,10 @@ class _invoiceRepository implements invoiceInterface
         }
         return $totalpayable; 
     }
+    public function getinvoicebycustomerprofession($customerprofession_id)
+    {
+        return $this->invoice->with('currency','customer','settlementsplit','receipts.exchangerate')->where('source_id',$customerprofession_id)->where('source','customerprofession')->get();
+    }
     public function getcustomerprofessioninvoices($customerprofession_id)
     {
      $invoices = $this->invoice->with('currency','customer','settlementsplit')->where('source_id',$customerprofession_id)->where('source','customerprofession')->get();
@@ -231,7 +235,7 @@ class _invoiceRepository implements invoiceInterface
                             if($checkcustomerprofessionqualificationassessment){
                                 if($checkcustomerprofessionqualificationassessment->status != "APPROVED"){
                                     $lockbutton = true;
-                                    $comment = "QA assessment pending";
+                                    $comment = "Qualification assessment awaiting approval";
                                 }
                             }
                         }
@@ -254,6 +258,7 @@ class _invoiceRepository implements invoiceInterface
                     }
                  
                     $arraydata[] = [
+                        'data'=>$invoice,
                         'id'=>$invoice->id,
                         "created_at"=>$invoice->created_at,
                         'invoice_number'=>$invoice->invoice_number,
@@ -283,12 +288,13 @@ class _invoiceRepository implements invoiceInterface
                             if($checkcustomerprofessionqualificationassessment){
                                 if($checkcustomerprofessionqualificationassessment->status != "APPROVED"){
                                     $lockbutton = true;
-                                    $comment = "Qualification assessment pending";
+                                    $comment = "Qualification assessment awaiting approval";
                                 }
                             }
                         }
                     }
                     $arraydata[] = [
+                        'data'=>$invoice,
                         'id'=>$invoice->id,
                         "created_at"=>$invoice->created_at,
                         'invoice_number'=>$invoice->invoice_number,
@@ -306,6 +312,7 @@ class _invoiceRepository implements invoiceInterface
 
                 if($invoice->description == "Qualification Assessment"){
                     $arraydata[] = [
+                        'data'=>$invoice,
                         'id'=>$invoice->id,
                         "created_at"=>$invoice->created_at,
                         'invoice_number'=>$invoice->invoice_number,

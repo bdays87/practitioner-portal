@@ -29,6 +29,7 @@ class _suspenseRepository implements isuspenseInterface
         foreach ($currencylist as $currency) {
             $balance[] = [
                 'currency' => $currency->name,
+                'currency_id' => $currency->id,
                 'balance' => $this->computeBalance($customer_id, $currency->id)
             ];
         }

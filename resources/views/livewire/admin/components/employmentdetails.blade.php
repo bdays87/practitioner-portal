@@ -1,7 +1,7 @@
 <div>
    <x-card title="Employment details" class="mt-5 border-2 border-gray-200">
     <x-slot:menu>
-        <x-button class="btn-primary" icon="o-plus" wire:click="$set('modal', true)">Add Employment Detail</x-button>
+        <x-button class="btn-primary btn-circle" icon="o-plus" separator wire:click="$set('modal', true)"/>
     </x-slot:menu>
    <x-table :headers="$headers" :rows="$customer->employmentdetails" class="table table-xs">
    @scope('actions', $employmentdetail)

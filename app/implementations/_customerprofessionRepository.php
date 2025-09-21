@@ -125,6 +125,7 @@ class _customerprofessionRepository implements icustomerprofessionInterface
       $this->customerprofession->where("id",$customerprofession->id)->delete();
       return ["status"=>"error","message"=>$registrationinvoice['message']];
     }
+    return ["status"=>"success","message"=>$registrationinvoice['message']];
    }
     public function generatepractitionerinvoice($id){
         $customerprofession = $this->customerprofession->with("registration","applications","qualificationassessments")->find($id);
@@ -135,7 +136,7 @@ class _customerprofessionRepository implements icustomerprofessionInterface
         if($customerprofession->registration==null){
             
           $this->invoicerepo->createInvoice(['description'=>'Registration','customerprofession_id'=>$customerprofession->id,'year'=>date("Y")]);
-     
+      
     }
           
     if(count($customerprofession->applications)==0){
@@ -205,6 +206,12 @@ class _customerprofessionRepository implements icustomerprofessionInterface
     }
     public function getbyuuid($uuid){
         $customerprofession = $this->customerprofession->with('customer','profession','customertype','employmentstatus','employmentlocation','registertype','documents.document','qualifications.qualificationcategory','qualifications.qualificationlevel')->where("uuid",$uuid)->first();
+         if(!$customerprofession){
+            return [
+                "customerprofession"=>null,
+                "uploaddocuments"=>[]
+            ];
+        }
         $documentrequirements = $this->documentrequirement->with('document')->where("tire_id",$customerprofession->profession->tire_id)->where("customertype_id",$customerprofession->customertype_id)->get();
         $uploaddocuments = [];
         foreach ($documentrequirements as $documentrequirement) {
@@ -353,7 +360,11 @@ class _customerprofessionRepository implements icustomerprofessionInterface
                     $certificatenumber = $this->generalutils->generatecertificatenumber($customerprofession->profession->prefix,$customerregistration->id);
                     $customerregistration->update(["status"=>"APPROVED","registrationdate"=>date("Y-m-d"),"user_id"=>Auth::user()->id,"certificatenumber"=>$certificatenumber]);
                     $user = $customerprofession->customer->customeruser->user;
+                    if($customerprofession->customertype_id == 3){
+                        $customerprofession->update(["status"=>"APPROVED"]);  
+                    }else{
                     $customerprofession->update(["status"=>"PENDING"]);
+                    }
                     $user->notify(new RegistrationApprovalNotification($customerprofession->customer,$customerprofession->profession,$data['status'],$data['comment']));
                 }
                 

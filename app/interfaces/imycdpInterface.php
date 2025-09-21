@@ -13,4 +13,6 @@ interface imycdpInterface
     public function deleteattachment($id);
     public function submitforassessment($id);
     public function getbycustomerprofession($id,$year);
+    public function getcdps($year,$status);
+    public function assignpoints($id,$points);
 }

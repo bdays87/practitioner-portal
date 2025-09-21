@@ -7,6 +7,7 @@ use App\implementations\_applicationfeeRepository;
 use App\implementations\_applicationtypeRepository;
 use App\implementations\_bankRepository;
 use App\implementations\_banktranactionRepository;
+use App\implementations\_activityRepository;
 use App\implementations\_certificatetypeRepository;
 use App\implementations\_cityRepository;
 use App\implementations\_currencyRepository;
@@ -34,6 +35,7 @@ use App\implementations\_professionRepository;
 use App\implementations\_provinceRepository;
 use App\implementations\_qualificationcategoryRepository;
 use App\implementations\_qualificationlevelRepository;
+use App\implementations\_quizRepository;
 use App\implementations\_registertypeRepository;
 use App\implementations\_registrationfeeRepository;
 use App\implementations\_roleRepository;
@@ -78,6 +80,8 @@ use App\Interfaces\iprofessionInterface;
 use App\Interfaces\iprovinceInterface;
 use App\Interfaces\iqualificationcategoryInterface;
 use App\Interfaces\iqualificationlevelInterface;
+use App\Interfaces\iquizInterface;
+use App\Interfaces\iactivityInterface;
 use App\Interfaces\iregistertypeInterface;
 use App\Interfaces\iregistrationfeeInterface;
 use App\Interfaces\iroleInterface;
@@ -149,6 +153,8 @@ class RepositoryProvider extends ServiceProvider
         $this->app->bind(iapplicationtypeInterface::class, _applicationtypeRepository::class);
         $this->app->bind(imycdpInterface::class, _mycdpRepository::class);
         $this->app->bind(iapplicationsessionInterface::class, _applicationsessionRepository::class);
+        $this->app->bind(iactivityInterface::class, _activityRepository::class);
+        $this->app->bind(iquizInterface::class, _quizRepository::class);
     
     }
 }

@@ -1,5 +1,5 @@
 <div>
-    <x-button label="Settle invoice" icon="o-arrow-right"  class="btn btn-primary w-full btn-outline" wire:click="$set('paymentmodal',true)"/>
+    <x-button label="Settle invoice" icon="o-arrow-right"  class="btn btn-success w-full" wire:click="$set('paymentmodal',true)"/>
     <x-modal wire:model="paymentmodal" title="Receipting" separator>
     
         <table class="table  table-zebra">
@@ -8,7 +8,7 @@
                     <td>{{ $invoice?->description }}</td>
                     <td>{{ $invoice?->currency->name }}{{ $invoice?->amount }}</td>
                 </tr>
-            </tbody>
+            </tbody> 
         </table>
         <x-card title="Invoice Settlement" separator class="border-2 rounded-lg mt-2 border-gray-200" progress-indicator>
            <x-form wire:submit="settleinvoice">
@@ -19,8 +19,8 @@
             <x-input prefix="{{ $prefix }}" label="Wallet balance" disabled value="{{ $walletbalance ?? 0 }}" />
            </div>
       
-            @if($walletbalance < 0)
-                <x-alert class="alert-error" title="Wallet balance is less than total payable" />
+            @if($walletbalance <= 0)
+                <x-alert class="alert-error" title="Insufficient wallet balance" />
             @else
             <x-button label="Make payment" icon="o-arrow-right"  class="btn mt-2 w-full btn-success" type="submit" spinner/>
             @endif
