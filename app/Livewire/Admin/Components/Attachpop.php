@@ -60,8 +60,11 @@ class Attachpop extends Component
     public function submitforverification(){
       $response = $this->invoicerepo->submitforverification($this->invoice->id);
       if($response["status"] == "success"){
-        $this->dispatch('invoicesettled',invoice_id:$this->invoice->id);
+        $this->dispatch('proofofpaymentsubmitted',invoice_id:$this->invoice->id);
         $this->success($response["message"]);
+        $this->reset('paymentfile');
+        $this->proofofpayments = new collection();
+        $this->attachmodal = false;
       }else{
         $this->error($response["message"]);
       }

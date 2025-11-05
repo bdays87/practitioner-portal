@@ -18,6 +18,26 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
+    'sendgrid' => [
+        'api_key' => env('SENDGRID_API_KEY'),
+    ],
+
+    'sms' => [
+        'gateway' => env('SMS_GATEWAY', 'log'), // log, twilio, africastalking
+    ],
+
+    'twilio' => [
+        'account_sid' => env('TWILIO_ACCOUNT_SID'),
+        'auth_token' => env('TWILIO_AUTH_TOKEN'),
+        'from_number' => env('TWILIO_FROM_NUMBER'),
+    ],
+
+    'africastalking' => [
+        'username' => env('AFRICASTALKING_USERNAME'),
+        'api_key' => env('AFRICASTALKING_API_KEY'),
+        'from' => env('AFRICASTALKING_FROM'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],

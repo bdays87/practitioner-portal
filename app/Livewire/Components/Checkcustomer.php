@@ -131,6 +131,7 @@ class Checkcustomer extends Component
         if($response['status']=='success'){
             $this->modal = false;
             $this->success($response['message']);
+            $this->dispatch('customer_refresh');
         }else{
             $this->error($response['message']);
         }

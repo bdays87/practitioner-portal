@@ -7,7 +7,10 @@
         @forelse(auth()->user()->notifications as $notification)
         <div>
             @if(array_key_exists('message',$notification->data))
-            <p class="p-5 border-b border-gray-200">{{ $notification->data['message'] }}</p>
+            <p>{{ $notification->data['message'] }}</p>
+            <p >{{ $notification->created_at->diffForHumans() }}</p>
+            <hr/>
+
             @endif
         </div>
         @empty

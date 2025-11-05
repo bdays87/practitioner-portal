@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Mary\Traits\Toast;
+use App\RenewalType;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class Customerprofessions extends Component
@@ -29,18 +30,25 @@ class Customerprofessions extends Component
     protected $applicationsessionrepo;
     protected $customerprofessionrepo;
     protected $applicationtyperepo;
+    protected $sessionrepo;
     public $addmodal = false;
     public $customertype_id;
     public $profession_id;
     public $registertype_id;
     public $employmentstatus_id;
+    public $session_id;
     public $employmentlocation_id;
     public $errormessage="";
     public $openmodal = false;
+    public $renewmodal = false;
+    public $customerprofession_id;
     public $customerprofession=null;
+    public $renewaltype;
+    public $message;
 
 
-    public function boot(icustomertypeInterface $customertype,iemploymentstatusInterface $employmentstatus,iemploymentlocationInterface $employmentlocation,iregistertypeInterface $registertype,iprofessionInterface $profession,icustomerprofessionInterface $customerprofessionrepo,iapplicationsessionInterface $applicationsessionrepo,iapplicationtypeInterface $applicationtyperepo){
+
+    public function boot(icustomertypeInterface $customertype,iemploymentstatusInterface $employmentstatus,iemploymentlocationInterface $employmentlocation,iregistertypeInterface $registertype,iprofessionInterface $profession,icustomerprofessionInterface $customerprofessionrepo,iapplicationsessionInterface $applicationsessionrepo,iapplicationtypeInterface $applicationtyperepo,iapplicationsessionInterface $sessionrepo){
         $this->customertyperepo = $customertype;
         $this->employmentstatusrepo = $employmentstatus;
         $this->employmentlocationrepo = $employmentlocation;
@@ -49,6 +57,7 @@ class Customerprofessions extends Component
         $this->customerprofessionrepo = $customerprofessionrepo;
         $this->applicationsessionrepo = $applicationsessionrepo;
         $this->applicationtyperepo = $applicationtyperepo;
+        $this->sessionrepo = $sessionrepo;
     }
 
     public function mount($customer){
@@ -83,6 +92,11 @@ class Customerprofessions extends Component
         return $registertypes;
     }
 
+    public function selectrenewaltype($type){
+       
+        $this->renewaltype=$type;
+    }
+
     public function getprofession(){
         return $this->professionrepo->getAll(null,null);
     }
@@ -107,8 +121,8 @@ class Customerprofessions extends Component
             $this->addmodal = false; 
             $this->success('Profession added successfully.');
             $customertypes = $this->getcustomertype();
-            if($customertypes->where('id',$this->customertype_id)->first()->name=='Student'){
-                $this->redirect(route('admin.customer.show',$response['data']));
+            if($customertypes->where('id',$this->customertype_id)->first()->name=='Student'){ 
+                $this->redirect(route('customer.student.show',$response['data']));
             }else{
                 $this->redirect(route('customer.profession.show',$response['data']));
             }
@@ -173,11 +187,38 @@ class Customerprofessions extends Component
         }, "practising_certificate.pdf");
              
         }
+
+        public function renew($id){
+            $this->customerprofession_id = $id;
+            $this->renewmodal = true;
+        }
+
+        public function getTypeOptions()
+    {
+        return RenewalType::options();
+    }
+    public function getapplicationsessions(){
+        return $this->sessionrepo->getactive();
+    }
+
+    public function proceedwithrenewal(){
+        $this->validate([
+            'session_id'=>'required',
+            'renewaltype'=>'required',
+        ]);
+        $response = $this->customerprofessionrepo->renew($this->customerprofession_id,['year'=>$this->session_id,'applicationtype_id'=>$this->renewaltype]);
+        if($response['status'] == "success"){
+            $this->success($response['message']);
+            $this->renewmodal = false;
+        }else{
+            $this->message=$response['message'];
+        }
+    }
   
 
 
     public function render()
     {
-        return view('livewire.admin.components.customerprofessions',['employmentstatuses'=>$this->getemploymentstatus(),'customertypes'=>$this->getcustomertype(),'employmentlocations'=>$this->getemploymentlocation(),'registertypes'=>$this->getregistertype(),'professions'=>$this->getprofession(),'applicationsessions'=>$this->getapplicationsession(),'applicationtypes'=>$this->getapplicationtype()]);
+        return view('livewire.admin.components.customerprofessions',['employmentstatuses'=>$this->getemploymentstatus(),'customertypes'=>$this->getcustomertype(),'employmentlocations'=>$this->getemploymentlocation(),'registertypes'=>$this->getregistertype(),'professions'=>$this->getprofession(),'applicationsessions'=>$this->getapplicationsession(),'applicationtypes'=>$this->getapplicationtype(),'types'=>$this->getTypeOptions(),'sessions'=>$this->getapplicationsessions()]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use DateTime;
 
 class Customer extends Model
 {
@@ -38,6 +39,14 @@ class Customer extends Model
     }
     public function customeruser(){
         return $this->hasOne(Customeruser::class);
+    }
+
+    public function getage(){
+        $dob = DateTime::createFromFormat('Y-m-d', $this->dob);
+        if($dob === false){
+            return 0;
+        }
+        return \Carbon\Carbon::parse($dob)->diffInYears(\Carbon\Carbon::now());
     }
 
     

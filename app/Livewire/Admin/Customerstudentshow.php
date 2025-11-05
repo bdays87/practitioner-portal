@@ -12,6 +12,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Mary\Traits\Toast;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Auth;
 
 class Customerstudentshow extends Component
 {
@@ -58,6 +59,7 @@ class Customerstudentshow extends Component
     }
     public function mount($uuid){
         $this->uuid = $uuid;
+        if(Auth::user()->accounttype_id == 1){ 
         $this->breadcrumbs = [
             [
                 'label' => 'Dashboard',
@@ -73,6 +75,18 @@ class Customerstudentshow extends Component
                 'label' => 'Customer Student'
             ],
         ];
+        }else{
+            $this->breadcrumbs = [
+                [
+                    'label' => 'Dashboard',
+                    'icon' => 'o-home',
+                    'link' => route('dashboard'),
+                ],
+                [
+                    'label' => 'My Profession'
+                ],
+            ];
+        }
     }
     public function getdata(){
         $data = $this->repo->getcustomerstudent($this->uuid);
@@ -168,8 +182,7 @@ class Customerstudentshow extends Component
     }
     public function uploadDocument(){
         $this->validate([
-            'file'=>'required',
-            'verified'=>'required',
+            'file'=>'required'
         ]);
         $path = $this->file->store('documents');
         $response = $this->repo->uploadDocument([ "document_id"=>$this->document_id,

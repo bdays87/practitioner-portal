@@ -17,8 +17,29 @@ class Customerapplication extends Model
         'registration_date' => 'date',
     ];
 
-    public function customerprofession(){
+    public function customerprofession()
+    {
         return $this->belongsTo(Customerprofession::class);
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function applicationtype()
+    {
+        return $this->belongsTo(Applicationtype::class);
+    }
+
+    public function registertype()
+    {
+        return $this->belongsTo(Registertype::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Customerapplicationdocument::class);
     }
 
     /**
@@ -28,10 +49,10 @@ class Customerapplication extends Model
      */
     public function isExpired(): bool
     {
-        if (!$this->certificate_expiry_date) {
-            return false; // Consider as not expired if no expiry date is set
+        if (! $this->certificate_expiry_date) {
+            return true; // Consider as not expired if no expiry date is set
         }
-        
+
         return Carbon::parse($this->certificate_expiry_date)->isPast();
     }
 
@@ -42,7 +63,7 @@ class Customerapplication extends Model
      */
     public function isValid(): bool
     {
-        return !$this->isExpired();
+        return ! $this->isExpired();
     }
 
     /**
@@ -55,9 +76,8 @@ class Customerapplication extends Model
         return $this->isExpired() ? 'Expired' : 'Valid';
     }
 
-    public function mycdps(){
+    public function mycdps()
+    {
         return $this->hasMany(Mycdp::class);
     }
-
-  
 }

@@ -5,6 +5,7 @@ namespace App\Interfaces;
 interface invoiceInterface
 {
     public function createInvoice($data);
+    public function createrenewalinvoice($data);
     public function getInvoice($id);
     public function deleteInvoice($id);
     public function getinvoicebycustomerprofession($customerprofession_id);

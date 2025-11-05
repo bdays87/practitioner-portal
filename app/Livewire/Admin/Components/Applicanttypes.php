@@ -10,6 +10,7 @@ class Applicanttypes extends Component
 {
     use Toast;
     public $name;
+    public $description;
     public $id;
     protected $repo;
     public $modifymodal = false;
@@ -24,18 +25,18 @@ class Applicanttypes extends Component
     }
 
     public function save(){
-        $this->validate(['name'=>'required']);
+        $this->validate(['name'=>'required','description'=>'required']);
         if($this->id){
             $this->update();
         }else{
             $this->create();
         }
-        $this->reset(['name','id']);
+        $this->reset(['name','id','description']);
 
     }
 
     public function create(){
-         $response = $this->repo->create(['name'=>$this->name]);
+         $response = $this->repo->create(['name'=>$this->name,'description'=>$this->description]);
          if($response['status']=='success'){
             $this->success($response['message']);
          }else{
@@ -43,7 +44,7 @@ class Applicanttypes extends Component
          }
     }
     public function update(){
-         $response = $this->repo->update($this->id,['name'=>$this->name]);
+         $response = $this->repo->update($this->id,['name'=>$this->name,'description'=>$this->description]);
          if($response['status']=='success'){
             $this->success($response['message']);
          }else{
@@ -61,12 +62,14 @@ class Applicanttypes extends Component
     public function edit($id){
         $this->id = $id;
         $this->name = $this->repo->get($id)->name;
+        $this->description = $this->repo->get($id)->description;
         $this->modifymodal = true;
     }
 
     public function headers():array{
         return [
             ['key' => 'name', 'label' => 'Name'],
+            ['key' => 'description', 'label' => 'Description'],
             ['key' => 'action', 'label' => ''],
         ];
     }

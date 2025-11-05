@@ -2,15 +2,17 @@
    <x-card class="border-2 border-gray-200">
   
        
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid lg:grid-cols-2 gap-2">
                 <div class="flex justify-center">
-                    <x-card class="border-2 border-gray-200">
-                    <img src="{{ $customer->profile ? '/storage/' . $customer->profile : '/imgs/noimage.jpg' }}" class="w-100 h-100" alt="">
-                    </x-card>
+                    @if($customer->profile)
+                    <img src="/storage/{{ $customer->profile }}" class="lg:w-100 lg:h-100 w-40 h-40" alt="">
+                    @else
+                    <img src="/imgs/noimage.jpg" class="lg:w-100 lg:h-100 w-40 h-40" alt="">
+                    @endif
                 </div>
                 <div>
                     <x-card>
-                    <table class="table table-xs table-zebra">
+                    <table class="table table-xs table-compact">
                         <tbody>
                         <tr>
                             <td>Registration Number</td>

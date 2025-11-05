@@ -1,12 +1,12 @@
 <div class="bg-gray-50 min-h-screen">
     <!-- Static Header -->
     <div class="relative bg-white">
-        <div class="relative rounded-2xl mt-12 h-96 md:h-[400px] bg-gradient-to-r from-blue-900 to-blue-700 overflow-hidden">
+        <div class="relative rounded-2xl mt-12 h-96 md:h-[400px] bg-gradient-to-r from-blue-300 to-blue-400 overflow-hidden">
            
             <div class="container mx-auto px-6 py-12 h-full flex flex-col justify-center relative z-10">
                 <div class="text-center text-white">
-                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Medical laboratory & Clinical Scientists Council of Zimbabwe</h1>
-                    <p class="text-xl md:text-2xl max-w-2xl mx-auto">Your gateway to professional certification and career advancement</p>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to {{ config('app.name') }}</h1>
+                    <p class="text-xl md:text-2xl max-w-2xl mx-auto">Laboratory and Clinical Scientists Council of Zimbabwe</p>
                     <div class="mt-8">
                         <x-button link="{{ route('register') }}" class="bg-white hover:bg-gray-100 text-blue-800 font-semibold px-6 py-3 rounded-lg transition duration-300 inline-flex items-center">
                             Start Registration
@@ -115,7 +115,7 @@
     </section>
     
     <!-- Footer -->
-    <footer class="bg-blue-900 text-white py-12">
+    <footer class="bg-blue-400 text-white py-12">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>

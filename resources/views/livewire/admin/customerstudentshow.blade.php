@@ -4,14 +4,14 @@
     <x-header title="{{ $data['customerprofession']->customer->name }} {{ $data['customerprofession']->customer->surname }}" subtitle="{{ $data['customerprofession']->profession->name }} || {{ $data['customerprofession']->registertype->name }} || {{ $data['customerprofession']->customertype->name }}" class="mt-5 border-2 border-gray-200 rounded-lg p-5">
        
         <x-slot:actions>
-            <livewire:admin.components.wallettopups :currencies="$currencies" :customer="$data['customerprofession']->customer" />
             <livewire:admin.components.walletbalances :customer="$data['customerprofession']->customer" />
         </x-slot:actions>
     </x-header>
+    <div class="text-2xl font-bold mt-5">1. My Qualification</div>
 
     <x-card title="Qualifications" separator class="mt-5 border-2 border-gray-200">
         <x-slot:menu>
-            <x-button icon="o-plus" label="Add Institution" class="btn btn-primary" wire:click="$set('qualificationmodal', true)" spinner />
+            <x-button icon="o-plus" label="Add Qualification" responsive class="btn btn-primary" wire:click="$set('qualificationmodal', true)" spinner />
         </x-slot:menu>
         <table class="table table-zebra">
             <thead>
@@ -55,6 +55,11 @@
         </table>
     
     </x-card>
+    <div class="text-2xl font-bold mt-5">2. Required Documents</div>
+
+    @if ($data['customerprofession']->studentqualifications==null)
+     <x-alert title="Qualifications" description="Please add qualifications to continue." icon="o-x-mark" class="alert-error mt-2"/>
+    @else
     <x-card title="Required Documents" separator class="mt-5 border-2 border-gray-200">
         <table class="table table-zebra">
             <thead>
@@ -93,7 +98,14 @@
          </table>
         
     </x-card>
-
+    @endif
+     @php 
+     $countpendingupload = collect($data['uploaddocuments'])->where('upload', false)->count();
+     @endphp
+     <div class="text-2xl font-bold mt-5">3. My Placements</div>
+     @if ($countpendingupload > 0)
+     <x-alert title="Documents" description="You have {{ $countpendingupload }} pending documents to upload. Please upload them to continue." icon="o-x-mark" class="alert-error mt-2"/>
+     @else
     <x-card title="Placements" separator class="mt-5 border-2 border-gray-200">
         <x-slot:menu>
             <x-button icon="o-plus" label="Add Placement" class="btn btn-primary" wire:click="$set('placementmodal', true)" spinner />
@@ -133,8 +145,16 @@
                 </tr>
                 @endforelse
             </tbody>
-         </table>
+         </table> 
     </x-card>
+    @endif
+
+    <div class="text-2xl font-bold mt-5">4. My Registration and payments</div>
+
+   @if(count($data['customerprofession']->placements??[])==0)
+   <x-alert title="Placements" description="Please add placements to continue." icon="o-x-mark" class="alert-error mt-2"/>
+   @else
+
     <x-card title="Registration" separator class="mt-5 border-2 border-gray-200">
         <x-slot:menu>
             @if ($data['customerprofession']->registration==null)
@@ -189,6 +209,7 @@
             </tbody>
          </table>
     </x-card>
+    @endif
 
 
 
@@ -213,7 +234,9 @@
         <x-form wire:submit="uploadDocument">
             <div class="grid  gap-2">
                 <x-input label="File" wire:model="file" type="file" />
+                @if(auth()->user()->accounttype_id == 1)
                 <x-checkbox label="Document verified" wire:model="verified" />
+                @endif
             </div>
             <x-slot:actions>
                 <x-button label="Cancel" @click="$wire.uploadmodal = false" />

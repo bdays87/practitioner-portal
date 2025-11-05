@@ -13,18 +13,24 @@ use App\Models\Customerprofessionqualificationassessment;
 use App\Models\Customerregistration;
 use App\Models\Invoice;
 use App\Models\Otherservice;
+use App\Models\Renewalfee;
 use App\Models\Proofofpayment;
 use App\Models\Receipt;
 use App\Models\Registrationfee;
 use App\Models\Settlementsplit;
 use App\Models\Suspense;
 use App\Models\User;
+use App\Models\Discount;
+use App\Models\Penalty;
+use App\Models\Customer;
+use App\Models\Applicationtype;
 use App\Notifications\ApplicationAwaitingApprovalNotification;
 use App\Notifications\InvoiceRegistrationNotification;
 use App\Notifications\InvoiceSettled;
 use App\Notifications\ProofofpaymentApproval;
 use App\Notifications\QualificationassesmentAwaitingApprovalNotification;
 use App\Notifications\RegistrationAwaitingApprovalNotification;
+use App\Notifications\RenewalapprovalNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -39,16 +45,22 @@ class _invoiceRepository implements invoiceInterface
     protected $customerprofession;
     protected $registrationfees;
     protected $applicationfees;
+    protected $discounts;
+    protected $customer;
+
+    protected $applicationtype;
     protected $customerregistration;
     protected $customerapplication;
     protected $otherservice;
     protected $generalutils;
     protected $proofofpayment;
     protected $receipt;
+    protected $renewalfee;
     protected $suspense;
+    protected $penalties;
     protected $customerprofessionqualificationassessment;
     protected $exchangeraterepo;
-    public function __construct(Invoice $invoice,Receipt $receipt,Settlementsplit $settlementsplit,Customerprofession $customerprofession,Registrationfee $registrationfees,Applicationfee $applicationfees,Customerregistration $customerregistration,Proofofpayment $proofofpayment,Customerapplication $customerapplication,Otherservice $otherservice,igeneralutilsInterface $generalutils,Suspense $suspense,Customerprofessionqualificationassessment $customerprofessionqualificationassessment,iexchangerateInterface $exchangeraterepo)
+    public function __construct(Invoice $invoice,Penalty $penalties,Applicationtype $applicationtype,Discount $discounts,Customer $customer,Receipt $receipt,Settlementsplit $settlementsplit,Customerprofession $customerprofession,Registrationfee $registrationfees,Applicationfee $applicationfees,Customerregistration $customerregistration,Proofofpayment $proofofpayment,Customerapplication $customerapplication,Otherservice $otherservice,igeneralutilsInterface $generalutils,Suspense $suspense,Customerprofessionqualificationassessment $customerprofessionqualificationassessment,iexchangerateInterface $exchangeraterepo,Renewalfee $renewalfee)
     {
         $this->invoice = $invoice;
         $this->receipt = $receipt;
@@ -61,10 +73,117 @@ class _invoiceRepository implements invoiceInterface
         $this->otherservice = $otherservice;
         $this->generalutils = $generalutils;
         $this->proofofpayment = $proofofpayment;
+        $this->customer = $customer;
         $this->suspense = $suspense;
+        $this->applicationtype = $applicationtype;
+        $this->discounts = $discounts;
         $this->customerprofessionqualificationassessment = $customerprofessionqualificationassessment;
         $this->exchangeraterepo = $exchangeraterepo;
-    
+        $this->renewalfee = $renewalfee;
+        $this->penalties = $penalties;
+    }
+    public function createrenewalinvoice($data){
+        try{
+            $customerprofession = $this->customerprofession->with('profession')->find($data['customerprofession_id']);
+                    if(!$customerprofession){
+                        return ["status"=>"error","message"=>"Customer profession not found"];
+                    }
+
+            $customerapplication = $this->customerapplication->where('customerprofession_id',$customerprofession->id)->where('year',$data['year'])->first();
+            if($customerapplication && $customerapplication->status == "APPROVED"){
+                return ["status"=>"error","message"=>"Customer application already approved"];
+            }
+            if($customerapplication && $customerapplication->status == "PENDING"){
+                return ["status"=>"error","message"=>"Customer application already pending"];
+            }
+            if($customerapplication && $customerapplication->status == "REJECTED"){
+                return ["status"=>"error","message"=>"Customer application already rejected"];
+            }
+
+             // get renewal fee       
+            $renewalfee = $this->renewalfee
+                               ->where('applicationtype_id',$data['applicationtype_id'])
+                               ->where('registertype_id',$customerprofession->registertype_id)
+                               ->where('tire_id',$customerprofession->profession->tire_id)
+                               ->first();
+            if(!$renewalfee){
+                return ["status"=>"error","message"=>"Renewal fee not found"];
+            }
+            $amount = $renewalfee->amount;
+            $penaltypercentage = 0;
+            $discountpercentage = 0;
+            $currency_id= $renewalfee->currency_id;
+            $settlementsplit_id = null;
+            //get last renewal 
+            $lastapplication = $this->customerapplication->where('customerprofession_id',$customerprofession->id)->where('status','APPROVED')->latest()->first();
+            if($lastapplication){
+                $computemonths = \Carbon\Carbon::parse($lastapplication->certificate_expiry_date)->diffInMonths(\Carbon\Carbon::now());
+                if($computemonths > 0){
+                    $penalty = $this->penalties->where('tire_id',$customerprofession->profession->tire_id)->where('lowerlimit','<=',$computemonths)->where('upperlimit','>=',$computemonths)->first();
+                    if($penalty){
+                        $penaltypercentage = $penalty->penalty;
+                    }
+                }
+            }
+
+            // get customer age
+            $applicationtype = $this->applicationtype->where('id',$data['applicationtype_id'])->first();
+            if($applicationtype->name == "RENEWAL"){
+            $customerage = $this->customer->where('id',$customerprofession->customer_id)->first()->getage();
+            if($customerage > 0){
+                    $discount = $this->discounts->where('tire_id',$customerprofession->profession->tire_id)->where('lowerlimit','<=',$customerage)->where('upperlimit','>=',$customerage)->first();
+                    if($discount){
+                        $discountpercentage = $discount->discount;
+                    }
+                }
+            }
+
+            $customerapplication = $this->customerapplication->create([
+                'customerprofession_id'=>$customerprofession->id,
+                'uuid'=>Str::uuid()->toString(),
+                'customer_id'=>$customerprofession->customer_id,
+                'registertype_id'=>$customerprofession->registertype_id,
+                'applicationtype_id'=>$data['applicationtype_id'],
+                'year'=>$data['year'],
+                'status'=>'PENDING',
+            ]);
+            $description = "Renewal | ";
+            $invoiceamount = $amount;
+            if($penaltypercentage > 0){
+                $description .= " Late Renewal Penalty of ". $penaltypercentage ."% |";
+                $invoiceamount = $invoiceamount + ($invoiceamount * $penaltypercentage/100);
+            }
+            if($discountpercentage > 0){
+                $description .= " Renewal Discount of ". $discountpercentage ."%";
+                $invoiceamount = $invoiceamount - ($invoiceamount * $discountpercentage/100);
+            }
+
+            $settlementsplit = $this->settlementsplit->where('employmentlocation_id',$customerprofession->employmentlocation_id)->where('type',$applicationtype->name)->first();   
+                 if($settlementsplit){
+                    $settlementsplit_id = $settlementsplit->id;
+                 }
+            
+
+
+            $this->invoice->create([
+                'source'=>'customerapplication',
+                'source_id'=>$customerapplication->id,
+                'customer_id'=>$customerprofession->customer_id,
+                'uuid'=>Str::uuid()->toString(),
+                'year'=>$data['year'],
+                'status'=>'PENDING',
+                'createdby'=>Auth::user()->id,
+                'description'=>$description,
+                'invoice_number'=>$this->generalutils->generateinvoice($customerapplication->id),
+                'amount'=>$invoiceamount,
+                'currency_id'=>$currency_id,
+                'settlementsplit_id'=>$settlementsplit_id,
+            ]);
+            return ["status"=>"success","message"=>"Renewal invoice created successfully","data"=>$customerapplication->id];
+        }
+        catch (\Throwable $th) {
+            return ["status"=>"error","message"=>$th->getMessage()];
+        }
     }
 
     public function createInvoice($data)
@@ -112,6 +231,7 @@ class _invoiceRepository implements invoiceInterface
          $applicationfee = $this->applicationfees->where('employmentlocation_id',$customerprofession->employmentlocation_id)->where('registertype_id',$customerprofession->registertype_id)->where('name','NEW')->latest()->first();
          $this->customerapplication->create([
             'customerprofession_id'=>$customerprofession->id,
+            'uuid'=>Str::uuid()->toString(),
             'customer_id'=>$customerprofession->customer_id,
             'registertype_id'=>$customerprofession->registertype_id,
             'year'=>$data['year'],
@@ -361,12 +481,12 @@ class _invoiceRepository implements invoiceInterface
     {try{
         $invoice = $this->invoice->with('customer')->where('id',$data['invoice_id'])->first();
         $this->proofofpayment->create($data);
-        $users = User::permission("invoices.receipt")->get();
+/*$users = User::permission("invoices.receipt")->get();
         if(count($users) > 0){
             foreach($users as $user){
                 $user->notify(new ProofofpaymentApproval($invoice));
             }
-        }
+        }*/
         return ['status'=>'success','message'=>'Invoice proof created successfully'];
     }catch(\Exception $e){
         return ['status'=>'error','message'=>$e->getMessage()];
@@ -385,7 +505,7 @@ class _invoiceRepository implements invoiceInterface
     public function submitforverification($invoice_id)
     {
         try{
-            $invoice = $this->invoice->where('id',$invoice_id)->first();
+            $invoice = $this->invoice->with('customer')->where('id',$invoice_id)->first();
             if($invoice->source == "customerprofession"){
                 $customerprofession = $this->customerprofession->where('id',$invoice->source_id)->first();
                 $customerprofession->status = "AWAITING_FINANCE";
@@ -393,6 +513,10 @@ class _invoiceRepository implements invoiceInterface
             }
             $invoice->status = "AWAITING";
             $invoice->save();
+            $users = User::permission("invoices.receipt")->get();
+            foreach($users as $user){
+                $user->notify(new ProofofpaymentApproval($invoice));
+            }
             return ['status'=>'success','message'=>'Invoice verified successfully'];
         }catch(\Exception $e){
             return ['status'=>'error','message'=>$e->getMessage()];
@@ -472,6 +596,14 @@ class _invoiceRepository implements invoiceInterface
                     }
                    }
                    
+                }elseif($invoice->source == "customerapplication"){
+                    $customerapplication = $this->customerapplication->with('customerprofession.customer')->where('id',$invoice->source_id)->first();
+                    $customerapplication->status = "AWAITING";
+                    $customerapplication->save();
+                    $user = User::permission("applications.approve")->get();
+                    foreach($user as $u){
+                        $u->notify(new RenewalapprovalNotification($invoice));
+                    }
                 }
 
 

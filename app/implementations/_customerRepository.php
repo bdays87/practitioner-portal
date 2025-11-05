@@ -142,7 +142,7 @@ class _customerRepository implements icustomerInterface
     public function getcustomerprofile($uuid)
     {
         try {
-            $customer = $this->customer->with('nationality','province','city','employmentstatus','employmentlocation','employmentdetails','contactdetails','customerprofessions','suspenses')->where('uuid', $uuid)->first();
+            $customer = $this->customer->with('nationality','province','city','employmentstatus','employmentlocation','employmentdetails','contactdetails','customerprofessions.applications.applicationtype','suspenses')->where('uuid', $uuid)->first();
             if (!$customer) {
                 return null;
             }

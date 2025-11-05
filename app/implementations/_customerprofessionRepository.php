@@ -13,6 +13,8 @@ use App\Models\Customerprofessionqualification;
 use App\Models\Customerprofessionqualificationassessment;
 use App\Models\Customerregistration;
 use App\Models\Documentrequirement;
+use App\Models\Customerapplicationdocument;
+use App\Models\Renewaldocument;
 use App\Models\Invoice;
 use App\Models\Qualificationcategory;
 use App\Notifications\ApplicationApprovalNotification;
@@ -24,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\Mycdp;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class _customerprofessionRepository implements icustomerprofessionInterface
@@ -33,6 +36,8 @@ class _customerprofessionRepository implements icustomerprofessionInterface
      */
     protected $customerprofession;
     protected $documentrequirement;
+    protected $mycdp;
+    protected $renewaldocument;
     protected $customerprofessiondocument;
     protected $customerprofessionqualification;
     protected $invoicerepo;
@@ -42,21 +47,27 @@ class _customerprofessionRepository implements icustomerprofessionInterface
     protected $customerprofessionregistration;
     protected $customerprofessionapplication;
     protected $customerprofessionqualificationassessment;
+    protected $customerapplication;
+    protected $customerapplicationdocument;
     protected $generalutils;
-    public function __construct(Customerprofession $customerprofession,Documentrequirement $documentrequirement,Customerprofessiondocument $customerprofessiondocument,Customerprofessionqualification $customerprofessionqualification,invoiceInterface $invoicerepo,Invoice $invoice,Qualificationcategory $qualificationcategory,Customerprofessioncomment $customerprofessioncomment,Customerregistration $customerprofessionregistration,Customerapplication $customerprofessionapplication,Customerprofessionqualificationassessment $customerprofessionqualificationassessment,igeneralutilsInterface $generalutils)
+    public function __construct(Customerprofession $customerprofession,Customerapplicationdocument $customerapplicationdocument,Renewaldocument $renewaldocument,Customerapplication $customerapplication,Mycdp $mycdp,Documentrequirement $documentrequirement,Customerprofessiondocument $customerprofessiondocument,Customerprofessionqualification $customerprofessionqualification,invoiceInterface $invoicerepo,Invoice $invoice,Qualificationcategory $qualificationcategory,Customerprofessioncomment $customerprofessioncomment,Customerregistration $customerprofessionregistration,Customerapplication $customerprofessionapplication,Customerprofessionqualificationassessment $customerprofessionqualificationassessment,igeneralutilsInterface $generalutils)
     {
         $this->customerprofession = $customerprofession;
+        $this->customerapplication = $customerapplication;
         $this->documentrequirement = $documentrequirement;
         $this->customerprofessiondocument = $customerprofessiondocument;
         $this->customerprofessionqualification = $customerprofessionqualification;
         $this->invoicerepo = $invoicerepo;
         $this->invoice = $invoice;
+        $this->renewaldocument = $renewaldocument;
         $this->qualificationcategory = $qualificationcategory;
+        $this->customerapplicationdocument = $customerapplicationdocument;
         $this->customerprofessioncomment = $customerprofessioncomment;
         $this->customerprofessionregistration = $customerprofessionregistration;
         $this->customerprofessionapplication = $customerprofessionapplication;
         $this->customerprofessionqualificationassessment = $customerprofessionqualificationassessment;
         $this->generalutils = $generalutils;
+        $this->mycdp = $mycdp;
     }
 
     public function getAll($status = "PENDING",$year = null)
@@ -114,6 +125,46 @@ class _customerprofessionRepository implements icustomerprofessionInterface
             return ["status"=>"error","message"=>$th->getMessage()];
         }
     } 
+    public function getapplicationbyuuid($uuid){
+        $customerapplication =  $this->customerapplication->with("customerprofession.customer","customerprofession.profession","documents.document")->where("uuid",$uuid)->first();
+        if(!$customerapplication){
+            return ["status"=>"error","message"=>"Customer application not found"];
+        }
+        $renewaldocuments = $this->renewaldocument->with("document")->where("applicationtype_id",$customerapplication->applicationtype_id)->where("tire_id",$customerapplication->customerprofession->profession->tire_id)->where("registertype_id",$customerapplication->customerprofession->registertype_id)->get();
+        $uploaddocuments = [];
+        foreach($renewaldocuments as $renewaldocument){
+            $uploaddocuments[] = [
+                "document_id"=>$renewaldocument->document_id,
+                "document_name"=>$renewaldocument->document->name,
+                'path'=>$customerapplication->documents->where("document_id",$renewaldocument->document_id)->first()?->file,
+                "upload"=>$customerapplication->documents->where("document_id",$renewaldocument->document_id)->count() > 0
+            ];
+        }
+        $invoice = $this->invoice->with("currency")->where("source_id",$customerapplication->id)->where("source","customerapplication")->first();
+        return ["data"=>$customerapplication,"uploaddocuments"=>$uploaddocuments,"invoice"=>$invoice];
+    }
+    public function renew($id,$data){
+        try {
+            $customerprofession = $this->customerprofession->with("profession")->find($id);
+            if(!$customerprofession){
+                return ["status"=>"error","message"=>"Customer profession not found"];
+            }
+            $yearrange = [$data['year']-1,$data['year']];
+            $mycdps = $this->mycdp->where('customerprofession_id',$customerprofession->id)->whereIn('year',$yearrange)->get();
+            $totalpoints = 0;
+            if($mycdps->count() > 0){
+              $totalpoints = $mycdps->sum('points');
+            }
+            if($totalpoints < $customerprofession->profession->minimum_cdp){
+                return ["status"=>"error","message"=>"Customer profession does not have enough points to renew, current points: ".$totalpoints." minimum required points: ".$customerprofession->profession->minimum_cdp    ];
+            }
+           return $this->invoicerepo->createrenewalinvoice(['customerprofession_id'=>$customerprofession->id,'year'=>$data['year'],'applicationtype_id'=>$data['applicationtype_id']]);
+     
+        }
+        catch (\Throwable $th) {
+            return ["status"=>"error","message"=>$th->getMessage()];
+        }
+    }
 
    public function generateregistrationinvoice($id){
     $customerprofession = $this->customerprofession->with("registration")->find($id);
@@ -459,6 +510,29 @@ public function generatestudentcertificate($id){
 public function generatepractisingcertificate($id){
    return $this->customerprofessionapplication->with("customerprofession.customer","customerprofession.profession","customerprofession.registertype")->where("id",$id)->first();
     
+}
+
+public function uploadrenewaldocuments($data){
+    try {
+        $customerapplicationdocument = $this->customerapplicationdocument->create($data);
+        return ["status"=>"success","message"=>"Document uploaded successfully"];
+    } catch (\Throwable $th) {
+        return ["status"=>"error","message"=>$th->getMessage()];
+    }
+}
+public function removerenewaldocument($document_id,$customerapplication_id){
+    try {
+        $customerapplicationdocument = $this->customerapplicationdocument->where("document_id",$document_id)->where("customerapplication_id",$customerapplication_id)->first();
+        if(!$customerapplicationdocument){
+            return ["status"=>"error","message"=>"Document not found"];
+        }
+        Storage::delete($customerapplicationdocument->file);
+        $customerapplicationdocument->delete();
+        return ["status"=>"success","message"=>"Document removed successfully"];
+    }
+    catch (\Throwable $th) {
+        return ["status"=>"error","message"=>$th->getMessage()];
+    }
 }
 
  

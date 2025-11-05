@@ -17,8 +17,8 @@
                 <img src="./logo/logo.jpg" alt="Logo" class="h-8 sm:h-12 md:h-16 lg:h-20 w-auto">
                 {{-- Brand --}}
                 <div class="hidden sm:block xs:block text-sm md:text-base lg:text-lg font-medium">
-                    <div class="hidden lg:block">Medical laboratory & Clinical Scientists Council of Zimbabwe</div>
-                    <div class="lg:hidden">MLCSCZ</div>
+                    <div class="hidden lg:block">{{ config('app.name') }}</div>
+                    <div class="lg:hidden">{{ config('app.name') }}</div>
                 </div>
             </div>
         </x-slot:brand>
